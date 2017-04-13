@@ -9,5 +9,13 @@ file(GLOB SRC "./*.c")
 
 add_library(mklEngine SHARED ${SRC})
 
-install (TARGETS mklEngine DESTINATION ~/torch-intel/extra/mklnn/build/lib/mklEngine)
-install (FILES ../SpatialConvolution.lua DESTINATION ~/torch-intel/extra/mklnn)
+#install (TARGETS mklEngine DESTINATION ~/torch-intel/extra/mklnn/build/lib/mklEngine)
+#install (FILES ../SpatialConvolution.lua DESTINATION ~/torch-intel/extra/mklnn)
+
+FILE(GLOB luasrc ../*.lua)
+SET(src "")
+ADD_TORCH_PACKAGE(cudnn "${src}" "${luasrc}" "Intel MKLNN")
+
+
+install (TARGETS mklEngine DESTINATION INST_LIBDIR)
+install (FILES ../*.lua DESTINATION INST_LUADIR)
