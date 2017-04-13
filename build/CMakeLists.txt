@@ -8,3 +8,6 @@ FIND_PACKAGE(Torch REQUIRED)
 file(GLOB SRC "./*.c")
 
 add_library(mklEngine SHARED ${SRC})
+
+install (TARGETS mklEngine DESTINATION ~/torch-intel/extra/mklnn/build/lib/mklEngine)
+install (FILES ../SpatialConvolution.lua DESTINATION ~/torch-intel/extra/mklnn)
