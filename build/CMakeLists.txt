@@ -14,7 +14,7 @@ add_library(mklEngine SHARED ${SRC})
 
 FILE(GLOB luasrc ../*.lua)
 SET(src "")
-ADD_TORCH_PACKAGE(cudnn "${src}" "${luasrc}" "Intel MKLNN")
+ADD_TORCH_PACKAGE(mklnn "${src}" "${luasrc}" "Intel MKLNN")
 
 
 install (TARGETS mklEngine DESTINATION INST_LIBDIR)
