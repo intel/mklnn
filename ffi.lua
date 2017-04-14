@@ -39,7 +39,7 @@ void THNN_FloatMKLDNN_ConvertLayoutBackToNCHW(
 ]]
 
 
-local MKLENGINE_PATH = package.searchpath('libmklEngine', package.cpath)
+local MKLENGINE_PATH = package.searchpath('libmklnn', package.cpath)
 mklnn.C = ffi.load(MKLENGINE_PATH)
 
 
