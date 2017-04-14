@@ -14,9 +14,10 @@ ENDIF()
 FIND_PACKAGE(Torch REQUIRED)
 
 
-FILE(GLOB luasrc ../*.lua)
-FILE(GLOB src ./*.c)
+FILE(GLOB luasrc ./*.lua)
+FILE(GLOB src ./build/*.c)
 #SET(src "init.c")
+MESSAGE(STATUS "src =" "${src}")
 ADD_TORCH_PACKAGE(mklnn "${src}" "${luasrc}" "Intel MKLNN")
 
 
