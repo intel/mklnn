@@ -88,7 +88,25 @@ void SpatialConvolutionMM_MKLDNN_bwdFilter(
           int padH,
           float scale,int group);
 
+void threshold_MKLDNN_updateGradInput(
+          THNNState *state,
+          THFloatTensor *input,
+          THFloatTensor *gradOutput,
+          THFloatTensor *gradInput,
+          float threshold,
+          bool inplace,
+          THLongTensor *primitives,
+          int initOk);
 
+void Threshold_MKLDNN_updateOutput(
+          THNNState *state,
+          THFloatTensor *input,
+          THFloatTensor *output,
+          float threshold,
+          float val,
+          bool inplace,
+          THLongTensor *primitives,
+          int initOk)
 ]]
 
 

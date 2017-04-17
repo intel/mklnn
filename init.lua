@@ -14,4 +14,5 @@ mklnn.wrapper = wrapper
 
 require('mklnn.SpatialConvolution')
 require('mklnn.test')
+require('mklnn.ThresholdMKLDNN')
 return mklnn
