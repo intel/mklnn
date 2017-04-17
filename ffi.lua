@@ -54,6 +54,40 @@ void SpatialConvolutionMM_MKLDNN_forward(
           int padH,
           int group);
 
+void SpatialConvolutionMM_MKLDNN_bwdData(
+          THFloatTensor *input,
+          THFloatTensor *gradOutput,
+          THFloatTensor *gradInput,
+          THFloatTensor *weight,
+          THFloatTensor *bias,
+          THFloatTensor *finput,
+          THFloatTensor *fgradInput,
+          THLongTensor *primitives,
+          int initOk,
+          int kW,
+          int kH,
+          int dW,
+          int dH,
+          int padW,
+          int padH,int group);
+
+void SpatialConvolutionMM_MKLDNN_bwdFilter(
+          THFloatTensor *input,
+          THFloatTensor *gradOutput,
+          THFloatTensor *gradWeight,
+          THFloatTensor *gradBias,
+          THFloatTensor *finput,
+          THFloatTensor *fgradInput,
+          THLongTensor *primitives,
+          int initOk,
+          int kW,
+          int kH,
+          int dW,
+          int dH,
+          int padW,
+          int padH,
+          float scale,int group);
+
 
 ]]
 

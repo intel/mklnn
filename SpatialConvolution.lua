@@ -95,7 +95,7 @@ function SpatialConvolution:updateGradInput(input, gradOutput)
 
    if self.gradInput then
       input, gradOutput = makeContiguous(self, input, gradOutput)
-      wrapper('SpatialConvolution_MKLDNN_bwdData',
+      wrapper('SpatialConvolutionMM_MKLDNN_bwdData',
          input:cdata(),
          gradOutput:cdata(),
          self.gradInput:cdata(),
@@ -115,7 +115,7 @@ end
 function SpatialConvolution:accGradParameters(input, gradOutput, scale)
    scale = scale or 1
    input, gradOutput = makeContiguous(self, input, gradOutput)
-   wrapper('SpatialConvolution_MKLDNN_bwdFilter',
+   wrapper('SpatialConvolutionMM_MKLDNN_bwdFilter',
       input:cdata(),
       gradOutput:cdata(),
       self.gradWeight:cdata(),

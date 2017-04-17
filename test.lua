@@ -1,8 +1,8 @@
 -- you can easily test specific uni：ts like this:
 -- th -lnn -e "nn.test{'LookupTable'}"
 -- th -lnn -e "nn.test{'LookupTable', 'Add'}"
-require 'nn'
-require 'mklnn'
+--require 'nn'
+--require 'mklnn'
 local mytester = torch.Tester()
 local jac
 local sjac
@@ -28,7 +28,7 @@ local function equal(t1, t2, msg)
    end
 end
 
-function SpatialConvolutionMKLDNN_g1()
+function mklnntest.SpatialConvolutionMKLDNN_g1()
    -- batch
    local from = math.random(1,5)
    local to = math.random(1,5)
@@ -58,7 +58,6 @@ function SpatialConvolutionMKLDNN_g1()
    local dnnOutput = dnnModule:forward(input_clone)
    local dnnprimitives = torch.LongTensor(3)
    dnnOutput.THNN.MKLDNN_ConvertLayoutBackToNCHW(dnnOutput:cdata(), dnnprimitives:cdata(),0,0)
-   print("print before mytester assert")
    mytester:assertTensorEq(oriOutput, dnnOutput, 0.00001, 'SpatialConvolutionMKLNN g1 output')
    
    if (PRINT_EN == 1) then 
@@ -97,7 +96,7 @@ function SpatialConvolutionMKLDNN_g1()
 end
 
  
-function SpatialConvolutionMKLDNN_g2()
+function mklnntest.SpatialConvolutionMKLDNN_g2()
 
   -- batch
    local batch = math.random(2,5)
@@ -202,6 +201,21 @@ function SpatialConvolutionMKLDNN_g2()
    end  
 end
 
-function mklnn.test()
-   SpatialConvolutionMKLDNN_g1()
+
+mytester:add(mklnntest)
+jac = nn.Jacobian
+sjac = nn.SparseJacobian
+
+function mklnn.test(tests,seed)  
+   -- Limit number of threads since everything is small
+   local nThreads = torch.getnumthreads()
+   torch.setnumthreads(1)
+   -- randomize stuff
+   local seed = seed or (1e5 * torch.tic())
+   print('Seed: ', seed)
+   math.randomseed(seed)
+   torch.manualSeed(seed)
+   mytester:run(tests)
+   torch.setnumthreads(nThreads)
+   return mytester 
 end
