@@ -36,6 +36,25 @@ void THNN_FloatMKLDNN_ConvertLayoutBackToNCHW(
           int i,
           int initOk
         );
+
+void SpatialConvolutionMM_MKLDNN_forward(
+          THFloatTensor *input,
+          THFloatTensor *output,
+          THFloatTensor *weight,
+          THFloatTensor *bias,
+          THFloatTensor *finput,
+          THFloatTensor *fgradInput,
+          THLongTensor *primitives,
+          int initOk,
+          int kW,
+          int kH,
+          int dW,
+          int dH,
+          int padW,
+          int padH,
+          int group);
+
+
 ]]
 
 

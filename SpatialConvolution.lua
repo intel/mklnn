@@ -1,4 +1,4 @@
-local SpatialConvolution, parent = torch.class('mklnn.SpatialConvolution', 'nn.SpatialConvolution')
+local SpatialConvolution, parent = torch.class('mklnn.SpatialConvolution', 'nn.Module')
 
 local wrapper = mklnn.wrapper
 function SpatialConvolution:__init(nInputPlane, nOutputPlane, kW, kH, dW, dH, padW, padH,group)
@@ -76,7 +76,7 @@ function SpatialConvolution:updateOutput(input)
    end
    input = makeContiguous(self, input)
 
-   wrapper('SpatialConvolution_MKLDNN_forward',
+   wrapper('SpatialConvolutionMM_MKLDNN_forward',
       input:cdata(),
       self.output:cdata(),
       self.weight:cdata(),
