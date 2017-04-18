@@ -106,7 +106,7 @@ void Threshold_MKLDNN_updateOutput(
           float val,
           bool inplace,
           THLongTensor *primitives,
-          int initOk)
+          int initOk);
 ]]
 
 

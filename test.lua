@@ -95,6 +95,54 @@ function mklnntest.SpatialConvolutionMKLDNN_g1()
    end  
 end
 
+function mklnntest.ReLUMKLDNN()
+   local batch = math.random(2,5)
+   local from = math.random(1,5)
+   local outi = math.random(5,9)
+   local outj = outi
+   local input = torch.randn(batch, from, outi, outj):float()
+   local gradOutput = torch.randn(batch, from, outi, outj):float()
+   local input_clone = input:clone():float()
+   local gradOutput_clone = gradOutput:clone():float()
+   local oriModule = nn.ReLU():float()
+   local dnnModule = mklnn.ReLUMKLDNN():float()
+   local oriOutput = oriModule:forward(input)
+   local dnnOutput = dnnModule:forward(input_clone)
+   mytester:assertTensorEq(oriOutput, dnnOutput, 0.00001, 'ReLUMKLDNN output')
+   if (PRINT_EN == 1) then 
+     print("ReLU MKLDNN >>>>>>>>")
+     local flatInput = torch.Tensor(input:nElement()):copy(input)
+     local flatOriOutput = torch.Tensor(oriOutput:nElement()):copy(oriOutput)
+     local flatDnnOutput = torch.Tensor(dnnOutput:nElement()):copy(dnnOutput)
+     local diff = flatDnnOutput-flatOriOutput
+     print('ReLU input')
+     print(flatInput)
+     print('ReLU oriOutput') 
+     print(flatOriOutput)
+     print('ReLU dnnOutput')
+     print(flatDnnOutput)
+     print('ReLU diff')
+     print(diff)    
+   end
+   local oriGradInput = oriModule:backward(input, gradOutput)
+   local dnnGradInput = dnnModule:backward(input_clone, gradOutput_clone)
+   mytester:assertTensorEq(oriGradInput, dnnGradInput, 0.00001, 'ReLUMKLDNN gradInput')
+   if (PRINT_EN == 1) then 
+      print("ReLU MKLDNN <<<<<<<<")
+      local flatGradOutput = torch.Tensor(gradOutput:nElement()):copy(gradOutput)
+      local flatOriGradInput = torch.Tensor(oriGradInput:nElement()):copy(oriGradInput)
+      local flatDnnGradInput = torch.Tensor(dnnGradInput:nElement()):copy(dnnGradInput)
+      local diff = flatDnnGradInput-flatOriGradInput
+      print('ReLU gradOutput')
+      print(flatGradOutput)
+      print('ReLU oriGradInput')
+      print(flatOriGradInput)
+      print('ReLU dnnGradInput')
+      print(flatDnnGradInput)
+      print('ReLU diff')
+      print( diff)  
+   end  
+end
  
 function mklnntest.SpatialConvolutionMKLDNN_g2()
 
