@@ -2,8 +2,13 @@
 #define TH_GENERIC_FILE "generic/ThresholdMKLDNN.c"
 //#else
 
-#include "MKLDNN.h"
 #include "TH.h"
+#include "MKLDNN.h"
+
+
+#define real float
+#define Real Float
+
 static void THNN_(SpatialConvolutionMM_MKLDNN_Relu_init_forward)(
           THLongTensor *primitives,
           int N,
