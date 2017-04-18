@@ -1,5 +1,5 @@
 #ifndef TH_GENERIC_FILE
-#define TH_GENERIC_FILE "generic/ThresholdMKLDNN.c"
+#define TH_GENERIC_FILE "ThresholdMKLDNN.c"
 //#else
 
 #define real float
