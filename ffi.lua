@@ -89,7 +89,6 @@ void SpatialConvolutionMM_MKLDNN_bwdFilter(
           float scale,int group);
 
 void threshold_MKLDNN_updateGradInput(
-          THNNState *state,
           THFloatTensor *input,
           THFloatTensor *gradOutput,
           THFloatTensor *gradInput,
@@ -99,7 +98,6 @@ void threshold_MKLDNN_updateGradInput(
           int initOk);
 
 void Threshold_MKLDNN_updateOutput(
-          THNNState *state,
           THFloatTensor *input,
           THFloatTensor *output,
           float threshold,
