@@ -2,11 +2,13 @@
 #define TH_GENERIC_FILE "ThresholdMKLDNN.c"
 //#else
 
-#define real float
-#define Real Float
 
 #include "TH.h"
 #include "MKLDNN.h"
+
+#define real float
+#define Real Float
+
 
 
 static void THNN_(SpatialConvolutionMM_MKLDNN_Relu_init_forward)(
@@ -161,7 +163,6 @@ static void SpatialConvolutionMM_MKLDNN_Relu_init_backward(
 
 
 void Threshold_MKLDNN_updateOutput(
-          THNNState *state,
           THTensor *input,
           THTensor *output,
           real threshold,
