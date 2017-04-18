@@ -42,7 +42,6 @@ function Threshold:updateOutput(input)
            self.threshold,
            self.val,
            self.inplace,
-           self.inplace,
            self.dnnPrimitives:cdata(),
            self.mkldnnInitOk
           ) 
