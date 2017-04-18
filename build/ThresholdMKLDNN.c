@@ -1,8 +1,9 @@
 #ifndef TH_GENERIC_FILE
 #define TH_GENERIC_FILE "generic/ThresholdMKLDNN.c"
-#else
+//#else
 
 #include "MKLDNN.h"
+#include "TH.h"
 static void THNN_(SpatialConvolutionMM_MKLDNN_Relu_init_forward)(
           THLongTensor *primitives,
           int N,
@@ -229,7 +230,6 @@ void Threshold_MKLDNN_updateOutput(
 }
 
 void Threshold_MKLDNN_updateGradInput(
-          THNNState *state,
           THTensor *input,
           THTensor *gradOutput,
           THTensor *gradInput,
