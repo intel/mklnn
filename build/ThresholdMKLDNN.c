@@ -11,7 +11,7 @@
 
 
 
-static void THNN_(SpatialConvolutionMM_MKLDNN_Relu_init_forward)(
+static void SpatialConvolutionMM_MKLDNN_Relu_init_forward(
           THLongTensor *primitives,
           int N,
           int inC,
