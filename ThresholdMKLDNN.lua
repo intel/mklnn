@@ -1,5 +1,6 @@
 local Threshold, parent = torch.class('mklnn.ThresholdMKLDNN','nn.Module')
 
+local wrapper = mklnn.wrapper
 function Threshold:__init(th,v,ip)
    parent.__init(self)
    self.threshold = th or 1e-6
