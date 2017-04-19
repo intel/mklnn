@@ -153,8 +153,8 @@ static void SpatialConvolutionMM_MKLDNN_Relu_init_backward(
 #endif
 
 	//backward conversion init
-	CHECK_ERR( THNN_(init_conversion)(&cv_backward_output, &buffer_backward_output, lt_relu_diff_out, lt_user_output), err );
-
+	//CHECK_ERR( THNN_(init_conversion)(&cv_backward_output, &buffer_backward_output, lt_relu_diff_out, lt_user_output), err );
+        CHECK_ERR(init_conversion(&cv_backward_output, &buffer_backward_output, lt_relu_diff_out, lt_user_output), err );
 	primitives->storage->data[CV_RELU_BACKWARD_OUTPUT] = (long long)cv_backward_output;
 	primitives->storage->data[BUFFER_RELU_BACKWARD_OUTPUT] = (long long)buffer_backward_output;
 	primitives->storage->data[BUFFER_RELU_BACKWARD_INPUT] = (long long)buffer_backward_input;
@@ -198,7 +198,9 @@ void Threshold_MKLDNN_updateOutput(
 	if(initOk == 0)
 	{
 		primitives->storage->data[RELU_LAYOUT_INPUT] = (long long)input->mkldnnLayout;
-		THNN_(SpatialConvolutionMM_MKLDNN_Relu_init_forward)(primitives,N,inC,inH,inW,outC,outH,outW,threshold);
+		//THNN_(SpatialConvolutionMM_MKLDNN_Relu_init_forward)(primitives,N,inC,inH,inW,outC,outH,outW,threshold);
+	        SpatialConvolutionMM_MKLDNN_Relu_init_forward(primitives,N,inC,inH,inW,outC,outH,outW,threshold);
+
 	}
 	real * buffer_forward_output = (real *)primitives->storage->data[BUFFER_RELU_FORWARD_OUTPUT];
 /*	if(input->mkldnnLayout != 0) // if the input is not NCHW layout
@@ -262,7 +264,9 @@ void Threshold_MKLDNN_updateGradInput(
 	if(initOk == 0)
 	{
 		primitives->storage->data[RELU_LAYOUT_OUTPUT] = (long long)gradOutput->mkldnnLayout;
-		THNN_(SpatialConvolutionMM_MKLDNN_Relu_init_backward)(primitives,N,inC,inH,inW,outC,outH,outW,threshold);
+		//THNN_(SpatialConvolutionMM_MKLDNN_Relu_init_backward)(primitives,N,inC,inH,inW,outC,outH,outW,threshold);
+		SpatialConvolutionMM_MKLDNN_Relu_init_backward(primitives,N,inC,inH,inW,outC,outH,outW,threshold);
+
 	}
 
 	THTensor_(resizeAs)(gradInput, input);
