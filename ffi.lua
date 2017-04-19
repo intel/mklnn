@@ -54,7 +54,7 @@ void SpatialConvolution_forward(
           int padH,
           int group);
 
-void SpatialConvolutionMM_MKLDNN_bwdData(
+void SpatialConvolution_bwdData(
           THFloatTensor *input,
           THFloatTensor *gradOutput,
           THFloatTensor *gradInput,
