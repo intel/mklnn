@@ -62,10 +62,12 @@ local function makeContiguous(self, input, gradOutput)
 end
 
 function SpatialConvolution:updateOutput(input)
-
-
+   if self.dnnPrimitives then
+      self.mkldnnInitOk = 1
+   else
+      self.mkldnnInitOk = 0
+   end
    self.dnnPrimitives = self.dnnPrimitives or torch.LongTensor(30)
-   self.mkldnnInitOk = 0
 
    self.finput = self.finput or input.new()
    self.fgradInput = self.fgradInput or input.new()
@@ -75,7 +77,6 @@ function SpatialConvolution:updateOutput(input)
       self.padding = nil
    end
    input = makeContiguous(self, input)
-
    wrapper('SpatialConvolution_forward',
       input:cdata(),
       self.output:cdata(),
@@ -92,7 +93,6 @@ function SpatialConvolution:updateOutput(input)
 end
 
 function SpatialConvolution:updateGradInput(input, gradOutput)
-
    if self.gradInput then
       input, gradOutput = makeContiguous(self, input, gradOutput)
       wrapper('SpatialConvolution_bwdData',
@@ -152,4 +152,3 @@ function SpatialConvolution:clearState()
    nn.utils.clear(self, 'finput', 'fgradInput', '_input', '_gradOutput')
    return parent.clearState(self)
 end
-
