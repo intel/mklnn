@@ -503,7 +503,7 @@ void SpatialConvolution_forward(
   if(initOk == 0)
   {
     primitives->storage->data[CONV_LAYOUT_INPUT] = (long long)input->mkldnnLayout;
-    SpatialConvolutionMM_MKLDNN_init_forward(primitives,N,inC,inH,inW,kH,kW,dH,dW,padH,padW,outC,outH,outW,group);
+    SpatialConvolution_init_forward(primitives,N,inC,inH,inW,kH,kW,dH,dW,padH,padW,outC,outH,outW,group);
   }
   m_conv_forward 		= (dnnPrimitive_t)(primitives->storage->data[FORWARD_INDEX]);
   cv_forward_input 	= (dnnPrimitive_t)primitives->storage->data[CONVERT_FORWARD_INPUT];
@@ -637,7 +637,7 @@ void SpatialConvolution_bwdData(
   int outW = gradOutput->size[3];
   if(initOk == 0){
     primitives->storage->data[CONV_LAYOUT_OUTPUT] = (long long)gradOutput->mkldnnLayout;
-    SpatialConvolutionMM_MKLDNN_init_bwddata(primitives,N,inC,inH,inW,kH,kW,dH,dW,padH,padW,outC,outH,outW,group);
+    SpatialConvolution_init_bwddata(primitives,N,inC,inH,inW,kH,kW,dH,dW,padH,padW,outC,outH,outW,group);
   }
   gettimeofday(&mid1,NULL);
   m_conv_bwdData = (dnnPrimitive_t) (primitives->storage->data[BWD_DATA_INDEX]);
@@ -762,7 +762,7 @@ void SpatialConvolution_bwdFilter(
   if(initOk == 0){
     primitives->storage->data[CONV_LAYOUT_INPUT] = (long long)input->mkldnnLayout;
     primitives->storage->data[CONV_LAYOUT_OUTPUT] = (long long)gradOutput->mkldnnLayout;
-    SpatialConvolutionMM_MKLDNN_init_bwdfilter(primitives,N,inC,inH,inW,kH,kW,dH,dW,padH,padW,outC,outH,outW,group);
+    SpatialConvolution_init_bwdfilter(primitives,N,inC,inH,inW,kH,kW,dH,dW,padH,padW,outC,outH,outW,group);
   }
 
   m_conv_bwdFilter = (dnnPrimitive_t) (primitives->storage->data[BWD_FILTER_INDEX]);
