@@ -929,7 +929,7 @@ void SpatialConvolution_bwdData(
 
 
 
-void SpatialConvolution__bwdFilter(
+void SpatialConvolution_bwdFilter(
           THTensor *input,
           THTensor *gradOutput,
           THTensor *gradWeight,
