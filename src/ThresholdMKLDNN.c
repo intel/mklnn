@@ -163,7 +163,7 @@ static void SpatialConvolutionMM_MKLDNN_Relu_init_backward(
 }
 
 
-void Threshold_MKLDNN_updateOutput(
+void Threshold_updateOutput(
           THTensor *input,
           THTensor *output,
           real threshold,
@@ -238,7 +238,7 @@ void Threshold_MKLDNN_updateOutput(
 #endif
 }
 
-void Threshold_MKLDNN_updateGradInput(
+void Threshold_updateGradInput(
           THTensor *input,
           THTensor *gradOutput,
           THTensor *gradInput,

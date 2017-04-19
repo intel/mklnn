@@ -95,7 +95,7 @@ function mklnntest.SpatialConvolutionMKLDNN_g1()
    end  
 end
 
-function mklnntest.ReLUMKLDNN()
+function mklnntest.ReLU()
    local batch = math.random(2,5)
    local from = math.random(1,5)
    local outi = math.random(5,9)
@@ -105,7 +105,7 @@ function mklnntest.ReLUMKLDNN()
    local input_clone = input:clone():float()
    local gradOutput_clone = gradOutput:clone():float()
    local oriModule = nn.ReLU():float()
-   local dnnModule = mklnn.ReLUMKLDNN():float()
+   local dnnModule = mklnn.ReLU():float()
    local oriOutput = oriModule:forward(input)
    local dnnOutput = dnnModule:forward(input_clone)
    mytester:assertTensorEq(oriOutput, dnnOutput, 0.00001, 'ReLUMKLDNN output')

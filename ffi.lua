@@ -37,7 +37,7 @@ void THNN_FloatMKLDNN_ConvertLayoutBackToNCHW(
           int initOk
         );
 
-void SpatialConvolutionMM_MKLDNN_forward(
+void SpatialConvolution_forward(
           THFloatTensor *input,
           THFloatTensor *output,
           THFloatTensor *weight,
@@ -71,7 +71,7 @@ void SpatialConvolutionMM_MKLDNN_bwdData(
           int padW,
           int padH,int group);
 
-void SpatialConvolutionMM_MKLDNN_bwdFilter(
+void SpatialConvolution_bwdFilter(
           THFloatTensor *input,
           THFloatTensor *gradOutput,
           THFloatTensor *gradWeight,
@@ -88,7 +88,7 @@ void SpatialConvolutionMM_MKLDNN_bwdFilter(
           int padH,
           float scale,int group);
 
-void Threshold_MKLDNN_updateGradInput(
+void Threshold_updateGradInput(
           THFloatTensor *input,
           THFloatTensor *gradOutput,
           THFloatTensor *gradInput,
@@ -97,7 +97,7 @@ void Threshold_MKLDNN_updateGradInput(
           THLongTensor *primitives,
           int initOk);
 
-void Threshold_MKLDNN_updateOutput(
+void Threshold_updateOutput(
           THFloatTensor *input,
           THFloatTensor *output,
           float threshold,

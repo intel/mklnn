@@ -607,7 +607,7 @@ static void SpatialConvolutionMM_MKLDNN_init_bwdfilter(
 
 }
 
-void SpatialConvolutionMM_MKLDNN_forward(
+void SpatialConvolution_forward(
           THTensor *input,
           THTensor *output,
           THTensor *weight,
@@ -770,7 +770,7 @@ void SpatialConvolutionMM_MKLDNN_forward(
 }
 
 
-void SpatialConvolutionMM_MKLDNN_bwdData(
+void SpatialConvolution_bwdData(
           THTensor *input,
           THTensor *gradOutput,
           THTensor *gradInput,
@@ -929,7 +929,7 @@ void SpatialConvolutionMM_MKLDNN_bwdData(
 
 
 
-void SpatialConvolutionMM_MKLDNN_bwdFilter(
+void SpatialConvolution__bwdFilter(
           THTensor *input,
           THTensor *gradOutput,
           THTensor *gradWeight,
