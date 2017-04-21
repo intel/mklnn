@@ -94,7 +94,7 @@ function mklnntest.SpatialConvolutionMKLDNN_g1()
       print( diff)   
    end 
 end
---[[
+
 function mklnntest.ReLU()
    local batch = math.random(2,5)
    local from = math.random(1,5)
@@ -249,7 +249,7 @@ function mklnntest.SpatialConvolutionMKLDNN_g2()
    end  
 end
 
-]]--
+
 mytester:add(mklnntest)
 jac = nn.Jacobian
 sjac = nn.SparseJacobian
