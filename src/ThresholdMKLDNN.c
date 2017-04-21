@@ -1,6 +1,6 @@
 #ifndef RELU_FILE
-#define RELU_FILE "ThresholdMKLDNN.c"
-//#else
+#define RELU_FILE "src/ThresholdMKLDNN.c"
+#else
 
 
 #include "TH.h"

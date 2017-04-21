@@ -22,6 +22,6 @@
 #include "generateAllTypes.h"
 
 
-//#include "src/ThresholdMKLDNN.c"
-//#include "generateAllTypes.h"
+#include "src/ThresholdMKLDNN.c"
+#include "generateAllTypes.h"
 
