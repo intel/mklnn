@@ -32,12 +32,12 @@ static void MKLNN_(SpatialConvolution_Relu_init_forward)(
   #if NEW_INTERFACE
   /*for new interface*/
   dnnPrimitiveAttributes_t attributes = NULL;
-  CHECK_ERR( MKLNN_(dnnPrimitiveAttributesCreate_F32)(&attributes), err );
+  CHECK_ERR( dnnPrimitiveAttributesCreate_F32(&attributes), err );
   #endif
   size_t inputSize[dimension] = 	{inW,inH,inC,N};
   size_t inputStrides[dimension] = { 1, inW, inH * inW, inC * inH * inW };
   if(primitives->storage->data[RELU_LAYOUT_INPUT] == 0) {
-    CHECK_ERR(MKLNN_( dnnLayoutCreate_F32)(&lt_relu_input, dimension, inputSize, inputStrides) , err );
+    CHECK_ERR(dnnLayoutCreate_F32(&lt_relu_input, dimension, inputSize, inputStrides) , err );
     #if CONVERSION_LOG
     fprintf(stderr ,"MKLDNN RELU get input layout FAIL......\n");
     #endif
