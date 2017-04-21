@@ -49,11 +49,11 @@ static void MKLNN_(SpatialConvolution_Relu_init_forward)(
     #endif
   }
   #if NEW_INTERFACE
-  CHECK_ERR( MKLNN_(dnnReLUCreateForward_F32)(&relu_forward, attributes, lt_relu_input, threshold), err );
-  CHECK_ERR( MKLNN_(dnnReLUCreateBackward_F32)(&relu_backward, attributes, lt_relu_input, lt_relu_input, threshold), err );
+  CHECK_ERR( dnnReLUCreateForward_F32(&relu_forward, attributes, lt_relu_input, threshold), err );
+  CHECK_ERR( dnnReLUCreateBackward_F32(&relu_backward, attributes, lt_relu_input, lt_relu_input, threshold), err );
   #else
-  CHECK_ERR( MKLNN_(dnnReLUCreateForward_F32)(&relu1, lt_relu_input, threshold), err );
-  CHECK_ERR( MKLNN_(dnnReLUCreateBackward_F32)(&relu1,lt_relu_diff_out, lt_relu_input, threshold), err );
+  CHECK_ERR( dnnReLUCreateForward_F32(&relu1, lt_relu_input, threshold), err );
+  CHECK_ERR( dnnReLUCreateBackward_F32(&relu1,lt_relu_diff_out, lt_relu_input, threshold), err );
   #endif
   if(primitives->storage->data[RELU_LAYOUT_INPUT] != 0) {
     CHECK_ERR( dnnLayoutCreateFromPrimitive_F32(&lt_relu_forward_output, relu_forward, dnnResourceDst), err );
