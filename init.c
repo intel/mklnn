@@ -19,9 +19,10 @@
 
 
 #include "src/SpatialConvolution.c"
+#include "src/ThresholdMKLDNN.c"
 #include "generateAllTypes.h"
 
 
-#include "src/ThresholdMKLDNN.c"
+//#include "src/ThresholdMKLDNN.c"
 //#include "generateAllTypes.h"
 
