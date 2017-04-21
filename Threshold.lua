@@ -1,6 +1,7 @@
 local Threshold, parent = torch.class('mklnn.Threshold','nn.Module')
 
 local wrapper = mklnn.wrapper
+local getType = mklnn.getType
 function Threshold:__init(th,v,ip)
    parent.__init(self)
    self.threshold = th or 1e-6
@@ -23,7 +24,7 @@ function Threshold:updateOutput(input)
    self.mkldnnInitOk = 0
 
    self:validateParameters()
-   wrapper('Threshold_updateOutput',
+   wrapper(getType(input),'Threshold_updateOutput',
            input:cdata(),
            self.output:cdata(),
            self.threshold,
@@ -37,7 +38,7 @@ end
 
 function Threshold:updateGradInput(input, gradOutput)
    self:validateParameters()
-   wrapper('Threshold_updateGradInput',
+   wrapper(getType(input),'Threshold_updateGradInput',
               input:cdata(),
               gradOutput:cdata(),
               self.gradInput:cdata(),
