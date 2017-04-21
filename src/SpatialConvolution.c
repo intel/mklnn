@@ -1,13 +1,8 @@
-#ifndef CONV_FILE
-#define CONV_FILE "SpatialConvolution.c"
+#ifndef TH_GENERIC_FILE
+#define TH_GENERIC_FILE "src/SpatialConvolution.c"
+#else
 
-#include "TH.h"
-#include "MKLDNN.h"
-
-#define real float
-#define Real Float
-
-dnnError_t  init_conversion(
+dnnError_t  MKLNN_(init_conversion)(
   dnnPrimitive_t *cv,
   real **ptr_out,
   dnnLayout_t lt_pr,
@@ -32,94 +27,7 @@ dnnError_t  init_conversion(
   }
 }
 
-
-
-
-void MKLDNN_set_tensor(
-  THTensor * t,
-  long long newBuffer,
-  long long newLayout
-  )
-{
-  //set the tensor pointer to newBuffer, and layout to newLayout
-  t->storage->data = (real * )newBuffer; //memory leak ??? need to check
-  t->mkldnnLayout = newLayout;
-  THStorage_(setMKLDNN)(t->storage);
-}
-
-
-
-void MKLDNN_ConvertLayoutBackToNCHW(
-  THTensor * input,
-  THLongTensor *primitives,
-  int i,
-  int initOk
-  )
-{
-  //Convert tensor from internal layout to NCHW layout
-  //The primitives save the conversions and buffers for each index.
-  //primitives[0] = conversion1
-  //primitives[1] = buffer1
-  dnnError_t err;
-  dnnPrimitive_t cv_BacktoNCHW = NULL;
-  real * dnnbuffer = NULL;
-  real * torchbuffer = NULL;
-  int N = input->size[0];
-  int inC = input->size[1];
-  int inH = input->size[2];
-  int inW = input->size[3];
-  dnnLayout_t mkldnnLayout = (dnnLayout_t)input->mkldnnLayout ;
-#if LOG_ENABLE
-  printf("MKLDNN_ConvertLayoutBackToNCHW: start, N=%d,C=%d,H=%d,W=%d,mkldnnLayout = 0x%x, input=0x%x, THTensor_(data)(input) = 0x%x \n",N,inC,inH,inW,mkldnnLayout,input, THTensor_(data)(input));
-#endif
-  if(initOk == 0){
-    size_t inputSize[dimension] = 	{inW,inH,inC,N};
-    size_t inputStrides[dimension] = { 1, inW, inH * inW, inC * inH * inW };
-    dnnLayout_t lt_user_input = NULL;
-
-    CHECK_ERR( dnnLayoutCreate_F32(&lt_user_input, dimension, inputSize, inputStrides) , err );
-#if CONVERSION_LOG
-    int input_size = dnnLayoutGetMemorySize_F32(mkldnnLayout);
-    int output_size = dnnLayoutGetMemorySize_F32(lt_user_input);
-    printf("MKLDNN_ConvertLayoutBackToNCHW init: N=%d,C=%d,H=%d,W=%d, mkldnnLayout = 0x%x, input_size = %d, output_size = %d\n", N,inC,inH,inW,mkldnnLayout,input_size,output_size);
-#endif
-    if(!dnnLayoutCompare_F32(mkldnnLayout, lt_user_input)){
-      CHECK_ERR( dnnConversionCreate_F32(&cv_BacktoNCHW, mkldnnLayout, lt_user_input), err );
-      CHECK_ERR( dnnAllocateBuffer_F32((void**)(&dnnbuffer), lt_user_input), err );
-      primitives->storage->data[i*3] = (long long)cv_BacktoNCHW;
-      primitives->storage->data[i*3 + 1] = (long long)dnnbuffer;
-      primitives->storage->data[i*3 + 2] = (long long)(THTensor_(data)(input));
-      torchbuffer = THTensor_(data)(input);
-    }
-  }else{
-    cv_BacktoNCHW = (dnnPrimitive_t)primitives->storage->data[i*3];
-    dnnbuffer = (real *)primitives->storage->data[i*3 + 1];
-    torchbuffer = (real *)primitives->storage->data[i*3 + 2];
-  }
-  int need_convert = (cv_BacktoNCHW != 0);
-  real * buffer = NULL;
-  if(need_convert){
-    //do not release the original buffer
-    real * inPtr = THTensor_(data)(input);
-    if(inPtr == torchbuffer){
-      //convert the torchbuffer to dnnbuffer
-      buffer = dnnbuffer;
-    }else{
-      //convert the dnnbuffer to torchbuffer
-      buffer = torchbuffer;
-    }
-    CHECK_ERR( dnnConversionExecute_F32(cv_BacktoNCHW, inPtr, buffer), err );
-    input->storage->data = buffer;
-    THStorage_(setMKLDNN)(input->storage);
-  }
-#if LOG_ENABLE
-  printf("MKLDNN_ConvertLayoutBackToNCHW:primitives = 0x%x, cv_BacktoNCHW = 0x%x, buffer = 0x%x, dnnbuffer = 0x%x, torchbuffer = 0x%x, need_convert = %d\n", primitives, cv_BacktoNCHW, buffer,dnnbuffer,torchbuffer,need_convert );
-  printf("MKLDNN_ConvertLayoutBackToNCHW: end. \n");
-#endif
-
-}
-
-static void SpatialConvolution_init_forward(
+static void MKLNN_(SpatialConvolution_init_forward)(
   THLongTensor *primitives,
   int N,
   int inC,
@@ -198,9 +106,9 @@ static void SpatialConvolution_init_forward(
   CHECK_ERR( dnnLayoutCreateFromPrimitive_F32(&lt_forward_conv_output,m_conv_forward, dnnResourceDst) , err );	
 
   //init forward conversions:
-  CHECK_ERR( init_conversion(&cv_forward_input, 	&buffer_forward_input, 	lt_forward_conv_input, 	lt_user_input) , err );
-  CHECK_ERR( init_conversion(&cv_forward_filter, 	&buffer_forward_filter, lt_forward_conv_filter, lt_user_filter), err );
-  CHECK_ERR( init_conversion(&cv_forward_bias, 	&buffer_forward_bias, 	lt_forward_conv_bias, 	lt_user_bias), err );
+  CHECK_ERR( MKLNN_(init_conversion)(&cv_forward_input, 	&buffer_forward_input, 	lt_forward_conv_input, 	lt_user_input) , err );
+  CHECK_ERR( MKLNN_(init_conversion)(&cv_forward_filter, 	&buffer_forward_filter, lt_forward_conv_filter, lt_user_filter), err );
+  CHECK_ERR( MKLNN_(init_conversion)(&cv_forward_bias, 	&buffer_forward_bias, 	lt_forward_conv_bias, 	lt_user_bias), err );
 
 
   int size1 = dnnLayoutGetMemorySize_F32(lt_forward_conv_output);
@@ -247,7 +155,8 @@ static void SpatialConvolution_init_forward(
 
 }
 
-static void SpatialConvolution_init_bwddata(
+
+static void MKLNN_(SpatialConvolution_init_bwddata)(
   THLongTensor *primitives,
   int N,
   int inC,
@@ -320,8 +229,8 @@ static void SpatialConvolution_init_bwddata(
     dnnLayout_t lt_forward_conv_filter = NULL;
     CHECK_ERR( dnnLayoutCreateFromPrimitive_F32(&lt_forward_conv_filter, m_conv_forward, dnnResourceFilter), err );
 
-    CHECK_ERR( init_conversion(&cv_bwddata_filter, 	&buffer_bwddata_filter, lt_bwddata_conv_filter, lt_forward_conv_filter) , err );
-    CHECK_ERR( init_conversion(&cv_bwddata_output, 	&buffer_bwddata_output, lt_bwddata_conv_output, lt_user_output) , err );
+    CHECK_ERR( MKLNN_(init_conversion)(&cv_bwddata_filter, 	&buffer_bwddata_filter, lt_bwddata_conv_filter, lt_forward_conv_filter) , err );
+    CHECK_ERR( MKLNN_(init_conversion)(&cv_bwddata_output, 	&buffer_bwddata_output, lt_bwddata_conv_output, lt_user_output) , err );
 
     int size1 = dnnLayoutGetMemorySize_F32(lt_bwddata_conv_input);
     int size2 = dnnLayoutGetMemorySize_F32(lt_user_input);
@@ -364,7 +273,7 @@ static void SpatialConvolution_init_bwddata(
 
 }
 
-static void SpatialConvolution_init_bwdfilter(
+static void MKLNN_(SpatialConvolution_init_bwdfilter)(
   THLongTensor *primitives,
   int N,
   int inC,
@@ -446,8 +355,8 @@ static void SpatialConvolution_init_bwdfilter(
     CHECK_ERR( dnnLayoutCreateFromPrimitive_F32(&lt_bwdfilter_conv_output, m_conv_bwd_filter, dnnResourceDiffDst) , err );
 
     //init backward filter conversions:
-    CHECK_ERR( init_conversion(&cv_bwdfilter_input, &buffer_bwdfilter_input, lt_bwdfilter_conv_input, lt_user_input) , err );
-    CHECK_ERR( init_conversion(&cv_bwdfilter_output, &buffer_bwdfilter_output, lt_bwdfilter_conv_output, lt_user_output) , err );
+    CHECK_ERR( MKLNN_(init_conversion)(&cv_bwdfilter_input, &buffer_bwdfilter_input, lt_bwdfilter_conv_input, lt_user_input) , err );
+    CHECK_ERR( MKLNN_(init_conversion)(&cv_bwdfilter_output, &buffer_bwdfilter_output, lt_bwdfilter_conv_output, lt_user_output) , err );
   }else if(sizeof(real) == sizeof(double)){
     CHECK_ERR(dnnConvolutionCreateBackwardFilter_F64(&m_conv_bwd_filter,attributes, dnnAlgorithmConvolutionDirect, dimension, inputSize, outputSize, filterSize,stride,pad,dnnBorderZeros),err);
   }
@@ -467,7 +376,8 @@ static void SpatialConvolution_init_bwdfilter(
 
 }
 
-void SpatialConvolution_forward(
+
+void MKLNN_(SpatialConvolution_forward)(
   THTensor *input,
   THTensor *output,
   THTensor *weight,
@@ -503,7 +413,7 @@ void SpatialConvolution_forward(
   if(initOk == 0)
   {
     primitives->storage->data[CONV_LAYOUT_INPUT] = (long long)input->mkldnnLayout;
-    SpatialConvolution_init_forward(primitives,N,inC,inH,inW,kH,kW,dH,dW,padH,padW,outC,outH,outW,group);
+    MKLNN_(SpatialConvolution_init_forward)(primitives,N,inC,inH,inW,kH,kW,dH,dW,padH,padW,outC,outH,outW,group);
   }
   m_conv_forward 		= (dnnPrimitive_t)(primitives->storage->data[FORWARD_INDEX]);
   cv_forward_input 	= (dnnPrimitive_t)primitives->storage->data[CONVERT_FORWARD_INPUT];
@@ -603,7 +513,7 @@ void SpatialConvolution_forward(
 }
 
 
-void SpatialConvolution_bwdData(
+void MKLNN_(SpatialConvolution_bwdData)(
   THTensor *input,
   THTensor *gradOutput,
   THTensor *gradInput,
@@ -637,7 +547,7 @@ void SpatialConvolution_bwdData(
   int outW = gradOutput->size[3];
   if(initOk == 0){
     primitives->storage->data[CONV_LAYOUT_OUTPUT] = (long long)gradOutput->mkldnnLayout;
-    SpatialConvolution_init_bwddata(primitives,N,inC,inH,inW,kH,kW,dH,dW,padH,padW,outC,outH,outW,group);
+    MKLNN_(SpatialConvolution_init_bwddata)(primitives,N,inC,inH,inW,kH,kW,dH,dW,padH,padW,outC,outH,outW,group);
   }
   gettimeofday(&mid1,NULL);
   m_conv_bwdData = (dnnPrimitive_t) (primitives->storage->data[BWD_DATA_INDEX]);
@@ -724,9 +634,7 @@ void SpatialConvolution_bwdData(
 #endif
 }
 
-
-
-void SpatialConvolution_bwdFilter(
+void MKLNN_(SpatialConvolution_bwdFilter)(
   THTensor *input,
   THTensor *gradOutput,
   THTensor *gradWeight,
@@ -762,7 +670,7 @@ void SpatialConvolution_bwdFilter(
   if(initOk == 0){
     primitives->storage->data[CONV_LAYOUT_INPUT] = (long long)input->mkldnnLayout;
     primitives->storage->data[CONV_LAYOUT_OUTPUT] = (long long)gradOutput->mkldnnLayout;
-    SpatialConvolution_init_bwdfilter(primitives,N,inC,inH,inW,kH,kW,dH,dW,padH,padW,outC,outH,outW,group);
+    MKLNN_(SpatialConvolution_init_bwdfilter)(primitives,N,inC,inH,inW,kH,kW,dH,dW,padH,padW,outC,outH,outW,group);
   }
 
   m_conv_bwdFilter = (dnnPrimitive_t) (primitives->storage->data[BWD_FILTER_INDEX]);
@@ -851,5 +759,4 @@ void SpatialConvolution_bwdFilter(
   fprintf(stderr,"	Convolution MKLDNN  bwdfilter time1 = %.2f ms \n",duration1);
 #endif
 }
-
 #endif

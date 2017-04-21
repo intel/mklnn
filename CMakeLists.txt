@@ -14,7 +14,7 @@ FIND_PACKAGE(Torch REQUIRED)
 
 
 FILE(GLOB luasrc ./*.lua)
-FILE(GLOB src ./src/*.c)
+set(src  init.c)
 MESSAGE(STATUS "src =" "${src}")
 ADD_TORCH_PACKAGE(mklnn "${src}" "${luasrc}" "Intel MKLNN")
 

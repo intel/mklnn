@@ -1,48 +1,16 @@
 local ffi = require 'ffi'
 
 
-ffi.cdef[[
-
-typedef struct THMklFloatStorage
-{
-  float *data;
-  long size;
-  int refcount;
-  char flag;
-  //THAllocator *allocator;
-  void *allocatorContext;
-} THMklFloatStorage;
+local cdefs = [[
 
 
-
-typedef struct THMklFloatTensor
-{
-  long *size;
-  long *stride;
-  int nDimension;
-  THMklFloatStorage *storage;
-  long storageOffset;
-  int refcount;
-
-  char flag;
-  long mkldnnLayout;
-} THMklFloatTensor;
-
-
-void THNN_FloatMKLDNN_ConvertLayoutBackToNCHW(
-  THFloatTensor * input,
-  THLongTensor *primitives,
-  int i,
-  int initOk
-);
-
-void SpatialConvolution_forward(
-  THFloatTensor *input,
-  THFloatTensor *output,
-  THFloatTensor *weight,
-  THFloatTensor *bias,
-  THFloatTensor *finput,
-  THFloatTensor *fgradInput,
+void MKLNN_RealSpatialConvolution_forward(
+  THRealTensor *input,
+  THRealTensor *output,
+  THRealTensor *weight,
+  THRealTensor *bias,
+  THRealTensor *finput,
+  THRealTensor *fgradInput,
   THLongTensor *primitives,
   int initOk,
   int kW,
@@ -53,14 +21,15 @@ void SpatialConvolution_forward(
   int padH,
   int group);
 
-void SpatialConvolution_bwdData(
-  THFloatTensor *input,
-  THFloatTensor *gradOutput,
-  THFloatTensor *gradInput,
-  THFloatTensor *weight,
-  THFloatTensor *bias,
-  THFloatTensor *finput,
-  THFloatTensor *fgradInput,
+
+void MKLNN_RealSpatialConvolution_bwdData(
+  THRealTensor *input,
+  THRealTensor *gradOutput,
+  THRealTensor *gradInput,
+  THRealTensor *weight,
+  THRealTensor *bias,
+  THRealTensor *finput,
+  THRealTensor *fgradInput,
   THLongTensor *primitives,
   int initOk,
   int kW,
@@ -71,13 +40,13 @@ void SpatialConvolution_bwdData(
   int padH,
   int group);
 
-void SpatialConvolution_bwdFilter(
-  THFloatTensor *input,
-  THFloatTensor *gradOutput,
-  THFloatTensor *gradWeight,
-  THFloatTensor *gradBias,
-  THFloatTensor *finput,
-  THFloatTensor *fgradInput,
+void MKLNN_RealSpatialConvolution_bwdFilter(
+  THRealTensor *input,
+  THRealTensor *gradOutput,
+  THRealTensor *gradWeight,
+  THRealTensor *gradBias,
+  THRealTensor *finput,
+  THRealTensor *fgradInput,
   THLongTensor *primitives,
   int initOk,
   int kW,
@@ -89,27 +58,39 @@ void SpatialConvolution_bwdFilter(
   float scale,
   int group);
 
-void Threshold_updateGradInput(
-          THFloatTensor *input,
-          THFloatTensor *gradOutput,
-          THFloatTensor *gradInput,
-          float threshold,
-          bool inplace,
-          THLongTensor *primitives,
-          int initOk);
+void MKLNN_RealThreshold_updateGradInput(
+  THRealTensor *input,
+  THRealTensor *gradOutput,
+  THRealTensor *gradInput,
+  float threshold,
+  bool inplace,
+  THLongTensor *primitives,
+  int initOk);
 
-void Threshold_updateOutput(
-          THFloatTensor *input,
-          THFloatTensor *output,
-          float threshold,
-          float val,
-          bool inplace,
-          THLongTensor *primitives,
-          int initOk);
+void MKLNN_RealThreshold_updateOutput(
+  THRealTensor *input,
+  THRealTensor *output,
+  float threshold,
+  float val,
+  bool inplace,
+  THLongTensor *primitives,
+  int initOk);
+
 ]]
+
+
+local Real2real = {
+   Long='long',
+   Float='float',
+   Double='double'
+}
+
+
+for Real, real in pairs(Real2real) do
+   local type_cdefs=cdefs:gsub('Real', Real):gsub('real', real)
+   ffi.cdef(type_cdefs)
+end
 
 
 local MKLENGINE_PATH = package.searchpath('libmklnn', package.cpath)
 mklnn.C = ffi.load(MKLENGINE_PATH)
-
-

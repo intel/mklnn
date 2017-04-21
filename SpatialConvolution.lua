@@ -1,6 +1,7 @@
 local SpatialConvolution, parent = torch.class('mklnn.SpatialConvolution', 'nn.Module')
 
 local wrapper = mklnn.wrapper
+local getType = mklnn.getType
 function SpatialConvolution:__init(nInputPlane, nOutputPlane, kW, kH, dW, dH, padW, padH,group)
    parent.__init(self)
    
@@ -77,7 +78,7 @@ function SpatialConvolution:updateOutput(input)
       self.padding = nil
    end
    input = makeContiguous(self, input)
-   wrapper('SpatialConvolution_forward',
+   wrapper(getType(input),'SpatialConvolution_forward',
       input:cdata(),
       self.output:cdata(),
       self.weight:cdata(),
@@ -95,7 +96,7 @@ end
 function SpatialConvolution:updateGradInput(input, gradOutput)
    if self.gradInput then
       input, gradOutput = makeContiguous(self, input, gradOutput)
-      wrapper('SpatialConvolution_bwdData',
+      wrapper(getType(input),'SpatialConvolution_bwdData',
          input:cdata(),
          gradOutput:cdata(),
          self.gradInput:cdata(),
@@ -115,7 +116,7 @@ end
 function SpatialConvolution:accGradParameters(input, gradOutput, scale)
    scale = scale or 1
    input, gradOutput = makeContiguous(self, input, gradOutput)
-   wrapper('SpatialConvolution_bwdFilter',
+   wrapper(getType(input),'SpatialConvolution_bwdFilter',
       input:cdata(),
       gradOutput:cdata(),
       self.gradWeight:cdata(),
