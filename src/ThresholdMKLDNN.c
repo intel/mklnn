@@ -7,7 +7,7 @@
 
 //#include "TH.h"
 //#include "MKLDNN.h"
-//#include <stdbool.h>
+#include <stdbool.h>
 
 #define real float
 #define Real Float
