@@ -97,7 +97,7 @@ static void MKLNN_(SpatialConvolution_Relu_init_backward)(
   #if NEW_INTERFACE
   /*for new interface*/
   dnnPrimitiveAttributes_t attributes = NULL;
-  CHECK_ERR( MKLNN_(dnnPrimitiveAttributesCreate_F32)(&attributes), err );
+  CHECK_ERR( dnnPrimitiveAttributesCreate_F32(&attributes), err );
   #endif
   size_t outputSize[dimension] = {outW,outH,outC,N};
   size_t outputStrides[dimension] = { 1, outW, outH * outW, outC * outH * outW };
@@ -115,8 +115,8 @@ static void MKLNN_(SpatialConvolution_Relu_init_backward)(
   }
   //fprintf(stderr ,"MKLDNN RELU bwd data: relu_backward = 0x%x\n", relu_backward);
   real * buffer_backward_input = NULL;
-  CHECK_ERR( MKLNN_(dnnLayoutCreateFromPrimitive_F32)(&lt_relu_diff_out, relu_backward, dnnResourceDiffDst), err );
-  CHECK_ERR( MKLNN_(dnnLayoutCreateFromPrimitive_F32)(&lt_relu_diff_src, relu_backward, dnnResourceDiffSrc), err );
+  CHECK_ERR( dnnLayoutCreateFromPrimitive_F32(&lt_relu_diff_out, relu_backward, dnnResourceDiffDst), err );
+  CHECK_ERR( dnnLayoutCreateFromPrimitive_F32(&lt_relu_diff_src, relu_backward, dnnResourceDiffSrc), err );
   int size1 = dnnLayoutGetMemorySize_F32(lt_relu_diff_src);
   int size2 = inW*inH*inC*N*4;
   if(size1 == size2) {
@@ -130,10 +130,10 @@ static void MKLNN_(SpatialConvolution_Relu_init_backward)(
   }
   #if CONVERSION_LOG
   dnnLayout_t lt_relu_forward_output = (dnnLayout_t)primitives->storage->data[RELU_LAYOUT_FORWARD_OUTPUT];
-  int check1 = MKLNN_(dnnLayoutCompare_F32)(lt_user_output, lt_relu_diff_out);
-  int check2 = MKLNN_(dnnLayoutCompare_F32)(lt_user_output, lt_relu_forward_output);
-  int check3 = MKLNN_(dnnLayoutCompare_F32)(lt_relu_forward_output, lt_relu_diff_out);
-  int check4 = MKLNN_(dnnLayoutCompare_F32)(primitives->storage->data[RELU_LAYOUT_INPUT], lt_relu_diff_src);
+  int check1 = dnnLayoutCompare_F32(lt_user_output, lt_relu_diff_out);
+  int check2 = dnnLayoutCompare_F32(lt_user_output, lt_relu_forward_output);
+  int check3 = dnnLayoutCompare_F32(lt_relu_forward_output, lt_relu_diff_out);
+  int check4 = dnnLayoutCompare_F32(primitives->storage->data[RELU_LAYOUT_INPUT], lt_relu_diff_src);
   fprintf(stderr, "	MKLDNN RELU backward data, check1=%d,check2=%d,check3=%d, check4=%d\n", check1,check2,check3,check4);
   #endif
   //backward conversion init
@@ -196,7 +196,7 @@ void MKLNN_(Threshold_updateOutput)(
   real *resRelu1[dnnResourceNumber];
   resRelu1[dnnResourceSrc] = inPtr;
   resRelu1[dnnResourceDst] = THTensor_(data)(output);
-  CHECK_ERR( MKLNN_(dnnExecute_F32)(relu1, (void**)resRelu1), err );	
+  CHECK_ERR( dnnExecute_F32(relu1, (void**)resRelu1), err );	
   if(input->mkldnnLayout != 0) {
     output->mkldnnLayout = primitives->storage->data[RELU_LAYOUT_FORWARD_OUTPUT];
   }
@@ -262,9 +262,9 @@ void MKLNN_(Threshold_updateGradInput)(
   fprintf(stderr, "	RELU backward output conversion \n");
   #endif
   resRelu1[dnnResourceDiffDst] = buffer_backward_output;
-  CHECK_ERR( MKLNN_(dnnConversionExecute_F32)(cv_backward_output, THTensor_(data)(gradOutput), resRelu1[dnnResourceDiffDst]), err );
+  CHECK_ERR( dnnConversionExecute_F32(cv_backward_output, THTensor_(data)(gradOutput), resRelu1[dnnResourceDiffDst]), err );
   }
-  CHECK_ERR( MKLNN_(dnnExecute_F32)(relu1, (void**)resRelu1), err );
+  CHECK_ERR( dnnExecute_F32(relu1, (void**)resRelu1), err );
   /*	if(cv_backward_output)
 	{
 		gradInput->storage->data = resRelu1[dnnResourceDiffSrc];
