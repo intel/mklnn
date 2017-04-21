@@ -1,5 +1,7 @@
-#ifndef RELU_FILE
-#define RELU_FILE "src/ThresholdMKLDNN.c"
+//#ifndef RELU_FILE
+//#define RELU_FILE "src/ThresholdMKLDNN.c"
+#ifndef TH_GENERIC_FILE
+#define TH_GENERIC_FILE "src/ThresholdMKLDNN.c"
 #else
 
 
