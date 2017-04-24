@@ -249,6 +249,83 @@ function mklnntest.SpatialConvolutionMKLDNN_g2()
    end  
 end
 
+function mklnntest.SpatialMaxPooling()
+  for _,ceil_mode in pairs({true,false}) do
+    local from = math.random(1,5)
+    local ki = math.random(1,4)
+    --local kj = math.random(1,4)
+    local kj = ki
+    local si = math.random(1,3)
+    --local sj = math.random(1,3)
+    local sj  = si
+    local outi = math.random(4,5)
+    --local outj = math.random(4,5)
+    local outj = outi
+    local padW = math.min(math.random(0,1),math.floor(ki/2))
+    --local padH =  math.min(math.random(0,1),math.floor(kj/2))
+    local padH = padW
+    local ini = (outi-1)*si+ki-2*padW
+    local inj = (outj-1)*sj+kj-2*padH
+    -- batch
+    local nbatch = math.random(2,5)
+    local input = torch.rand(nbatch,from,inj,ini):float() 
+    local gradOutput = torch.rand(nbatch,from,outj,outi):float() 
+		    
+    local oriModule = nn.SpatialMaxPooling(ki,kj,si,sj,padW,padH):float()
+    local dnnModule = mklnn.SpatialMaxPoolingMKLDNN(ki,kj,si,sj,padW,padH):float()
+		   
+    if ceil_mode then 
+      oriModule:ceil() 
+      dnnModule:ceil()
+    else 
+      oriModule:floor() 
+      dnnModule:floor()
+    end
+	  
+    local input_clone = input:clone():float()
+    local gradOutput_clone = gradOutput:clone():float()
+
+    local oriOutput = oriModule:forward(input)
+    local dnnOutput = dnnModule:forward(input_clone)
+    mytester:assertTensorEq(oriOutput, dnnOutput, 0.00001, 'SpatialMaxPoolingMKLDNN output')
+
+    if (PRINT_EN == 1) then 
+      print("SpatialMaxPooling MKLDNN >>>>>>>>")
+      local flatInput = torch.Tensor(input:nElement()):copy(input)
+      local flatOriOutput = torch.Tensor(oriOutput:nElement()):copy(oriOutput)
+      local flatDnnOutput = torch.Tensor(dnnOutput:nElement()):copy(dnnOutput)
+      local diff = flatDnnOutput-flatOriOutput
+      print('SpatialMaxPooling input')
+      print(flatInput)
+      print('SpatialMaxPooling oriOutput') 
+      print(flatOriOutput)
+      print('SpatialMaxPooling dnnOutput')
+      print(flatDnnOutput)
+      print('SpatialMaxPooling diff')
+      print(diff)    
+    end  
+    local oriGradInput = oriModule:backward(input, gradOutput)
+    local dnnGradInput = dnnModule:backward(input_clone, gradOutput_clone)
+    mytester:assertTensorEq(oriGradInput, dnnGradInput, 0.00001, 'SpatialMaxPoolingMKLDNN gradInput')
+    if (PRINT_EN == 1) then 
+      print("SpatialMaxPooling MKLDNN <<<<<<<<")
+      local flatGradOutput = torch.Tensor(gradOutput:nElement()):copy(gradOutput)
+      local flatOriGradInput = torch.Tensor(oriGradInput:nElement()):copy(oriGradInput)
+      local flatDnnGradInput = torch.Tensor(dnnGradInput:nElement()):copy(dnnGradInput)
+      local diff = flatDnnGradInput-flatOriGradInput
+      print('SpatialMaxPooling gradOutput')
+      print(flatGradOutput)
+      print('SpatialMaxPooling oriGradInput')
+      print(flatOriGradInput)
+      print('SpatialMaxPooling dnnGradInput')
+      print(flatDnnGradInput)
+      print('SpatialMaxPooling diff')
+      print(diff)   
+    end  
+  end
+end
+
+
 
 mytester:add(mklnntest)
 jac = nn.Jacobian

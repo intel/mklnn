@@ -76,6 +76,70 @@ void MKLNN_RealThreshold_updateOutput(
   THLongTensor *primitives,
   int initOk);
 
+static void MKLNN_RealSpatialMaxPooling_init_forward(
+  THLongTensor *primitives,
+  int N,
+  int inC,
+  int inH,
+  int inW,
+  int kH,
+  int kW,
+  int dH,
+  int dW,
+  int padH,
+  int padW,
+  int outC,
+  int outH,
+  int outW);
+
+static void MKLNN_RealSpatialMaxPooling_init_backward(
+  THLongTensor *primitives,
+  int N,
+  int inC,
+  int inH,
+  int inW,
+  int kH,
+  int kW,
+  int dH,
+  int dW,
+  int padH,
+  int padW,
+  int outC,
+  int outH,
+  int outW);
+
+void MKLNN_RealSpatialMaxPooling_updateOutput(
+  THNNState *state,
+  THRealTensor *input,
+  THRealTensor *output,
+  THRealTensor *indices,
+  int kW,
+  int kH,
+  int dW,
+  int dH,
+  int padW,
+  int padH,
+  bool ceil_mode,
+  THLongTensor *primitives,
+  int initOk);
+
+void MKLNN_RealSpatialMaxPooling_updateGradInput(
+  THNNState *state,
+  THRealTensor *input,
+  THRealTensor *gradOutput,
+  THRealTensor *gradInput,
+  THRealTensor *indices,
+  int kW,
+  int kH,
+  int dW,
+  int dH,
+  int padW,
+  int padH,
+  bool ceil_mode,
+  THLongTensor *primitives,
+  int initOk);
+
+
 ]]
 
 
