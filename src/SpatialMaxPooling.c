@@ -183,7 +183,7 @@ static void MKLNN_(SpatialMaxPooling_init_backward)(
 	CHECK_ERR( dnnLayoutCreateFromPrimitive_F32(&lt_pool_backward_output, pool_bwd, dnnResourceDiffDst), err );
 
 	//backward conversion init
-	CHECK_ERR( THNN_(init_conversion)(&cv_backward_output, &buffer_backward_output, lt_pool_backward_output, lt_user_output), err );
+	CHECK_ERR( MKLNN_(init_conversion)(&cv_backward_output, &buffer_backward_output, lt_pool_backward_output, lt_user_output), err );
 
 	int size1 = dnnLayoutGetMemorySize_F32(lt_pool_backward_input);
 	int size2 = inW*inH*inC*N*4;
@@ -216,7 +216,7 @@ static void MKLNN_(SpatialMaxPooling_init_backward)(
 #endif
 }
 void MKLNN_(SpatialMaxPooling_updateOutput)(
-          THNNState *state,
+          //THNNState *state,
           THTensor *input,
           THTensor *output,
           THTensor *indices,
@@ -306,7 +306,7 @@ void MKLNN_(SpatialMaxPooling_updateOutput)(
 	if(initOk == 0)
 	{
 		primitives->storage->data[POOLING_LAYOUT_INPUT] = (long long)input->mkldnnLayout;
-		THNN_(SpatialMaxPooling_MKLDNN_init_forward)(primitives,N,inC,inH,inW,kH,kW,dH,dW,padH,padW,outC,outH,outW);
+		MKLNN_(SpatialMaxPooling_init_forward)(primitives,N,inC,inH,inW,kH,kW,dH,dW,padH,padW,outC,outH,outW);
 	}
 
 	dnnPrimitive_t cv_forward_input = NULL,cv_forward_output = NULL;
@@ -357,7 +357,7 @@ void MKLNN_(SpatialMaxPooling_updateOutput)(
 }
 
 void MKLNN_(SpatialMaxPooling_updateGradInput)(
-          THNNState *state,
+          //THNNState *state,
           THTensor *input,
           THTensor *gradOutput,
           THTensor *gradInput,
@@ -411,7 +411,7 @@ void MKLNN_(SpatialMaxPooling_updateGradInput)(
   /* backprop */
   if (input->nDimension == 3)
   {
-    THNN_(SpatialMaxPooling_updateGradInput_frame)(gradInput_data, gradOutput_data,
+    MKLNN_(SpatialMaxPooling_updateGradInput_frame)(gradInput_data, gradOutput_data,
                                                  indices_data,
                                                  nslices,
                                                  iwidth, iheight,
@@ -441,7 +441,7 @@ void MKLNN_(SpatialMaxPooling_updateGradInput)(
 	if(initOk == 0)
 	{
 		primitives->storage->data[POOLING_LAYOUT_OUTPUT] = (long long)gradOutput->mkldnnLayout;
-		THNN_(SpatialMaxPooling_MKLDNN_init_backward)(primitives,N,inC,inH,inW,kH,kW,dH,dW,padH,padW,outC,outH,outW);
+		MKLNN_(SpatialMaxPooling_init_backward)(primitives,N,inC,inH,inW,kH,kW,dH,dW,padH,padW,outC,outH,outW);
 	}
 
 	cv_backward_input 	= (dnnPrimitive_t) (primitives->storage->data[CV_POOLING_BACKWARD_INPUT]);

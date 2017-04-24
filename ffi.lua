@@ -109,7 +109,6 @@ static void MKLNN_RealSpatialMaxPooling_init_backward(
   int outW);
 
 void MKLNN_RealSpatialMaxPooling_updateOutput(
-  THNNState *state,
   THRealTensor *input,
   THRealTensor *output,
   THRealTensor *indices,
@@ -124,7 +123,6 @@ void MKLNN_RealSpatialMaxPooling_updateOutput(
   int initOk);
 
 void MKLNN_RealSpatialMaxPooling_updateGradInput(
-  THNNState *state,
   THRealTensor *input,
   THRealTensor *gradOutput,
   THRealTensor *gradInput,
