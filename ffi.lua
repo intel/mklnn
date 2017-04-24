@@ -153,7 +153,7 @@ static void MKLNN_RealBatchNormalization_init_backward(
   int outW,
   double eps);
 
-void MKLNN_BatchNormalization_updateOutput(
+void MKLNN_RealBatchNormalization_updateOutput(
    THRealTensor *input, 
    THRealTensor *output,
    THRealTensor *weight, 
@@ -167,6 +167,23 @@ void MKLNN_BatchNormalization_updateOutput(
    double eps,
    THLongTensor *primitives,
    int initOk);
+
+void MKLNN_RealBatchNormalization_backward(
+  THTensor *input, 
+  THTensor *gradOutput, 
+  THTensor *gradInput,
+  THTensor *gradWeight, 
+  THTensor *gradBias, 
+  THTensor *weight,
+  THTensor *running_mean, 
+  THTensor *running_var,
+  THTensor *save_mean, 
+  THTensor *save_std,
+  bool train, 
+  double scale, 
+  double eps,
+  THLongTensor *primitives,
+  int initOk);
 
 
 ]]

@@ -139,7 +139,8 @@ static void MKLNN_(BatchNormalization_init_backward)(
 
 
 void MKLNN_(BatchNormalization_updateOutput)(
-  THNNState *state, THTensor *input, THTensor *output,
+ // THNNState *state,
+  THTensor *input, THTensor *output,
   THTensor *weight, THTensor *bias,
   THTensor *running_mean, THTensor *running_var,
   THTensor *save_mean, THTensor *save_std,
