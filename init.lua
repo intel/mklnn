@@ -30,4 +30,5 @@ require('mklnn.SpatialConvolution')
 require('mklnn.test')
 require('mklnn.Threshold')
 require('mklnn.ReLU')
+require('mklnn.SpatialMaxPooling')
 return mklnn

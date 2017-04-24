@@ -272,7 +272,7 @@ function mklnntest.SpatialMaxPooling()
     local gradOutput = torch.rand(nbatch,from,outj,outi):float() 
 		    
     local oriModule = nn.SpatialMaxPooling(ki,kj,si,sj,padW,padH):float()
-    local dnnModule = mklnn.SpatialMaxPoolingMKLDNN(ki,kj,si,sj,padW,padH):float()
+    local dnnModule = mklnn.SpatialMaxPooling(ki,kj,si,sj,padW,padH):float()
 		   
     if ceil_mode then 
       oriModule:ceil() 
