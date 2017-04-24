@@ -179,7 +179,8 @@ void MKLNN_(BatchNormalization_updateOutput)(
 	output->storageOffset = 0;
 */
 	//fprintf(stderr, "BN MKLDNN, nInput = %d \n", nInput);
-	for(int i =0; i < inC; i++)
+	int i = 0;
+	for(; i < inC; i++)
 	{
 		buffer_forward_scaleshift[i] = weight ? THTensor_(get1d)(weight, i) : 1;
 		buffer_forward_scaleshift[i+inC] = bias ? THTensor_(get1d)(bias, i) : 0;
@@ -237,7 +238,8 @@ void MKLNN_(BatchNormalization_backward)(
 		fprintf(stderr, "BatchNormalization_MKLDNN_backward filter, input=0x%x,gradOutput=0x%x,gradInput=0x%x,workspace=0x%x,scaleshift=0x%x \n", THTensor_(data)(input),THTensor_(data)(gradOutput),THTensor_(data)(gradInput),buffer_forward_workspace,buffer_forward_scaleshift);
 		CHECK_ERR( dnnExecute_F32(bn_bwd_scaleshift, (void*)BatchNormScaleshift_res), err );
 		fprintf(stderr, "bn_bwd_scaleshift exec done \n");
-		for(int i=0; i < inC; i++)
+                int i = 0;
+		for(; i < inC; i++)
 		{
 			THTensor_(set1d)(gradWeight, i, buffer_forward_scaleshift[i]);
 			THTensor_(set1d)(gradBias, i, buffer_forward_scaleshift[i+inC]);
