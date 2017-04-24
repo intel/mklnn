@@ -325,6 +325,74 @@ function mklnntest.SpatialMaxPooling()
   end
 end
 
+function mklnntest.SpatialBatchNormalization()
+   local planes = torch.random(1,6)
+   local size = { torch.random(2, 6), planes }
+   local hw = torch.random(1,6) + 10
+   for i=1,2 do
+      table.insert(size, hw)
+   end
+   local input = torch.zeros(table.unpack(size)):uniform():float()
+   local input_clone = input:clone():float()
+
+   for _,affine_mode in pairs({true,false}) do
+
+      local mode_string = affine_mode and 'affine true' or 'affile false'
+      local oriModule = nn.SpatialBatchNormalization(planes, 1e-5, 0.1, affine_mode):float()
+      local dnnModule = mklnn.SpatialBatchNormalization(planes, 1e-5, 0.1, affine_mode):float()
+
+      if affine_mode then
+         dnnModule.weight:copy(oriModule.weight)
+         dnnModule.bias:copy(oriModule.bias)
+      end
+      local oriOutput = oriModule:forward(input)
+      local dnnOutput = dnnModule:forward(input_clone)
+
+      local dnnprimitives = torch.LongTensor(3)
+
+      dnnOutput.THNN.MKLDNN_ConvertLayoutBackToNCHW(dnnOutput:cdata(), dnnprimitives:cdata(),0,0)
+
+      mode_string = mode_string .. '  SpatialBatchNormalizationMKLDNN output'
+      mytester:assertTensorEq(oriOutput, dnnOutput, 0.00001, mode_string)
+            if (PRINT_EN == 1) then
+                print("SpatialBatchNormalization MKLDNN >>>>>>>>")
+                local flatInput = torch.Tensor(input:nElement()):copy(input)
+                local flatOriOutput = torch.Tensor(oriOutput:nElement()):copy(oriOutput)
+                local flatDnnOutput = torch.Tensor(dnnOutput:nElement()):copy(dnnOutput)
+                local diff = flatDnnOutput-flatOriOutput
+                print('SpatialBatchNormalization input')
+                print(flatInput)
+                print('SpatialBatchNormalization oriOutput')
+                print(flatOriOutput)
+                print('SpatialBatchNormalization dnnOutput')
+                print(flatDnnOutput)
+                print('SpatialBatchNormalization diff')
+                print(diff)
+      end
+      local gradOutput = oriOutput:clone():uniform(0,1)  --use original OP to aquire the size of output
+      local gradOutput_clone = gradOutput:clone()
+      local oriGradInput = oriModule:backward(input, gradOutput)
+      local dnnGradInput = dnnModule:backward(input_clone, gradOutput_clone)
+      dnnGradInput.THNN.MKLDNN_ConvertLayoutBackToNCHW(dnnGradInput:cdata(), dnnprimitives:cdata(),0,0)
+      mode_string = mode_string .. '  SpatialBatchNormalizationMKLDNN gradInput'
+      mytester:assertTensorEq(oriGradInput, dnnGradInput, 0.00001,  mode_string)
+	  if (PRINT_EN == 1) then
+			print("SpatialBatchNormalization MKLDNN <<<<<<<<")
+			local flatGradOutput = torch.Tensor(gradOutput:nElement()):copy(gradOutput)
+			local flatOriGradInput = torch.Tensor(oriGradInput:nElement()):copy(oriGradInput)
+			local flatDnnGradInput = torch.Tensor(dnnGradInput:nElement()):copy(dnnGradInput)
+			local diff = flatDnnGradInput-flatOriGradInput
+			print('SpatialBatchNormalization gradOutput')
+			print(flatGradOutput)
+			print('SpatialBatchNormalization oriGradInput')
+			print(flatOriGradInput)
+			print('SpatialBatchNormalization dnnGradInput')
+			print(flatDnnGradInput)
+			print('SpatialBatchNormalization diff')
+			print( diff)
+      end
+   end
+end
 
 
 mytester:add(mklnntest)

@@ -21,6 +21,7 @@
 #include "src/SpatialConvolution.c"
 #include "src/ThresholdMKLDNN.c"
 #include "src/SpatialMaxPooling.c"
+#include "src/BatchNormalization.c"
 #include "generateAllTypes.h"
 
 

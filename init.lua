@@ -31,4 +31,6 @@ require('mklnn.test')
 require('mklnn.Threshold')
 require('mklnn.ReLU')
 require('mklnn.SpatialMaxPooling')
+require('mklnn.BatchNormalization')
+require('mklnn.SpatialBatchNormalization')
 return mklnn

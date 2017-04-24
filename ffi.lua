@@ -137,6 +137,37 @@ void MKLNN_RealSpatialMaxPooling_updateGradInput(
   THLongTensor *primitives,
   int initOk);
 
+static void MKLNN_RealBatchNormalization_init_forward(
+  THLongTensor *primitives,
+  int N,
+  int inC,
+  int inH,
+  int inW,
+  double eps);
+
+static void MKLNN_RealBatchNormalization_init_backward(
+  THLongTensor *primitives,
+  int N,
+  int outC,
+  int outH,
+  int outW,
+  double eps);
+
+void MKLNN_BatchNormalization_updateOutput(
+   THRealTensor *input, 
+   THRealTensor *output,
+   THRealTensor *weight, 
+   THRealTensor *bias,
+   THRealTensor *running_mean, 
+   THRealTensor *running_var,
+   THRealTensor *save_mean, 
+   THRealTensor *save_std,
+   bool train, 
+   double momentum, 
+   double eps,
+   THLongTensor *primitives,
+   int initOk);
+
 
 ]]
 
