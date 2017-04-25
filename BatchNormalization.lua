@@ -108,10 +108,6 @@ end
 
 function BN:updateOutput(input)
    self:checkInputDim(input)
-   --[[
-   if self.timerEnable then
-   	startTime = sys.clock()
-   end]]--
    if self.initStep == 0 then
    	self.initStep = 1
    else
@@ -128,65 +124,19 @@ function BN:updateOutput(input)
    self.save_mean:resizeAs(self.running_mean)
    self.save_std = self.save_std or input.new()
    self.save_std:resizeAs(self.running_var)
-   --[[
-   if self.timerEnable then
-   	elementwiseTime = sys.clock()
-   end]]--
-   --[[
-   if self.compare then
-	   input.THNN.BatchNormalization_updateOutput(
-	      input:cdata(),
-	      self.output:cdata(),
-	      THNN.optionalTensor(self.weight),
-	      THNN.optionalTensor(self.bias),
-	      self.running_mean:cdata(),
-	      self.running_var:cdata(),
-	      self.save_mean:cdata(),
-	      self.save_std:cdata(),
-	      self.train,
-	      self.momentum,
-	      self.eps)
-	   tmpOut = torch.Tensor(self.output:size())
-	   input.THNN.BatchNormalization_MKLDNN_updateOutput(
-	      input:cdata(),
-	      tmpOut:cdata(),
-	      THNN.optionalTensor(self.weight),
-	      THNN.optionalTensor(self.bias),
-	      self.running_mean:cdata(),
-	      self.running_var:cdata(),
-	      self.save_mean:cdata(),
-	      self.save_std:cdata(),
-	      self.train,
-	      self.momentum,
-	      self.eps,
-	      self.dnnPrimitives:cdata(),self.mkldnnInitOk)
-
-           outSize = tonumber(tmpOut:cdata().size[0]*tmpOut:cdata().size[1]*tmpOut:cdata().size[2]*tmpOut:cdata().size[3])
-           input.THNN.SpatialConvolutionMM_compare(tmpOut:cdata(), self.output:cdata(), outSize,10)
-
-   else]]--
-	   --input.THNN.BatchNormalization_MKLDNN_updateOutput(
-	   wrapper(getType(input),'BatchNormalization_updateOutput',
-	      input:cdata(),
-	      self.output:cdata(),
-	      THNN.optionalTensor(self.weight),
-	      THNN.optionalTensor(self.bias),
-	      self.running_mean:cdata(),
-	      self.running_var:cdata(),
-	      self.save_mean:cdata(),
-	      self.save_std:cdata(),
-	      self.train,
-	      self.momentum,
-	      self.eps,
-	      self.dnnPrimitives:cdata(),self.mkldnnInitOk)
-  --[[ if self.timerEnable then
-	print("BatchNormalication  forward time =         ",self.timeForward," backward time =",self.timeBackward, ", elementwiseTime = ",elementwiseTime - startTime)
-	sys.sbnTime_forward = sys.sbnTime_forward + self.timeForward
-	sys.sbnTime_backward = sys.sbnTime_backward + self.timeBackward
-	self.timeForward =  (sys.clock() - startTime)
-	self.timeBackward = 0
-	self.cnt = self.cnt + 1
-   end]]--
+   wrapper(getType(input),'BatchNormalization_updateOutput',
+   input:cdata(),
+   self.output:cdata(),
+   THNN.optionalTensor(self.weight),
+   THNN.optionalTensor(self.bias),
+   self.running_mean:cdata(),
+   self.running_var:cdata(),
+   self.save_mean:cdata(),
+   self.save_std:cdata(),
+   self.train,
+   self.momentum,
+   self.eps,
+   self.dnnPrimitives:cdata(),self.mkldnnInitOk)
    return self.output
 end
 
@@ -194,11 +144,6 @@ local function backward(self, input, gradOutput, scale, gradInput, gradWeight, g
    self:checkInputDim(input)
    self:checkInputDim(gradOutput)
    assert(self.save_mean and self.save_std, 'must call :updateOutput() first')
-   --[[
-   if self.timerEnable then
-	startTime = sys.clock()
-   end
-   ]]--
 
    input, gradOutput = makeContiguous(self, input, gradOutput)
 
@@ -207,119 +152,39 @@ local function backward(self, input, gradOutput, scale, gradInput, gradWeight, g
       gradInput:resizeAs(gradOutput)
    end
    
-   --[[
-   if self.timerEnable then
-        elementwiseTime = sys.clock()
+   if gradInput then
+      wrapper(getType(input),'BatchNormalization_backward',
+         input:cdata(),
+         gradOutput:cdata(),
+         THNN.optionalTensor(gradInput),
+         THNN.optionalTensor(gradWeight),
+         THNN.optionalTensor(gradBias),
+         THNN.optionalTensor(self.weight),
+         self.running_mean:cdata(),
+         self.running_var:cdata(),
+         self.save_mean:cdata(),
+         self.save_std:cdata(),
+         self.train,
+         scale,
+         self.eps,
+         self.dnnPrimitives:cdata(),self.mkldnnInitOk)
+   else
+      input.THNN.BatchNormalization_backward(
+         input:cdata(),
+         gradOutput:cdata(),
+         THNN.optionalTensor(gradInput),
+         THNN.optionalTensor(gradWeight),
+         THNN.optionalTensor(gradBias),
+         THNN.optionalTensor(self.weight),
+         self.running_mean:cdata(),
+         self.running_var:cdata(),
+         self.save_mean:cdata(),
+         self.save_std:cdata(),
+         self.train,
+         scale,
+         self.eps)
    end
-   ]]--
-   --[[
-   if self.compare then
-	   input.THNN.BatchNormalization_backward(
-	      input:cdata(),
-	      gradOutput:cdata(),
-	      THNN.optionalTensor(gradInput),
-	      THNN.optionalTensor(gradWeight),
-	      THNN.optionalTensor(gradBias),
-	      THNN.optionalTensor(self.weight),
-	      self.running_mean:cdata(),
-	      self.running_var:cdata(),
-	      self.save_mean:cdata(),
-	      self.save_std:cdata(),
-	      self.train,
-	      scale,
-	      self.eps)
 
-	if gradInput then
-	   outSize = tonumber(gradInput:cdata().size[0] *gradInput:cdata().size[1] *gradInput:cdata().size[2] *gradInput:cdata().size[3])
-	   tmpOut = torch.Tensor(outSize)
-
-	   input.THNN.BatchNormalization_MKLDNN_backward(
-	      input:cdata(),
-	      gradOutput:cdata(),
-	      THNN.optionalTensor(tmpOut),
-	      THNN.optionalTensor(gradWeight),
-	      THNN.optionalTensor(gradBias),
-	      THNN.optionalTensor(self.weight),
-	      self.running_mean:cdata(),
-	      self.running_var:cdata(),
-	      self.save_mean:cdata(),
-	      self.save_std:cdata(),
-	      self.train,
-	      scale,
-	      self.eps,
-	      self.dnnPrimitives:cdata(),self.mkldnnInitOk)
-	   input.THNN.SpatialConvolutionMM_compare(tmpOut:cdata(), gradInput:cdata(), outSize,11)
-	else
-
-	   outSize1 = tonumber(gradWeight:cdata().size[0] )
-	   outSize2 = tonumber(gradBias:cdata().size[0] )
-	   print("gradWeight dim = ", gradWeight:dim(),", outSize1 = ",outSize1)
-	   print("gradBias dim = ", gradBias:dim(),", outSize2 = ", outSize2)
-	   tmpWeight = torch.Tensor(outSize1)
-	   tmpBias = torch.Tensor(outSize2)
-
-	   input.THNN.BatchNormalization_MKLDNN_backward(
-	      input:cdata(),
-	      gradOutput:cdata(),
-	      THNN.optionalTensor(gradInput),
-	      THNN.optionalTensor(gradWeight),
-	      THNN.optionalTensor(gradBias),
-	      THNN.optionalTensor(self.weight),
-	      self.running_mean:cdata(),
-	      self.running_var:cdata(),
-	      self.save_mean:cdata(),
-	      self.save_std:cdata(),
-	      self.train,
-	      scale,
-	      self.eps,
-	      self.dnnPrimitives:cdata())
-	   input.THNN.SpatialConvolutionMM_compare(tmpWeight:cdata(), gradWeight:cdata(), outSize1,12)
-	   input.THNN.SpatialConvolutionMM_compare(tmpBias:cdata(), gradBias:cdata(), outSize2,13)
-	end
-   else]]--
-        if gradInput then
-           --input.THNN.BatchNormalization_MKLDNN_backward(
-           wrapper(getType(input),'BatchNormalization_backward',
-              input:cdata(),
-              gradOutput:cdata(),
-              THNN.optionalTensor(gradInput),
-              THNN.optionalTensor(gradWeight),
-              THNN.optionalTensor(gradBias),
-              THNN.optionalTensor(self.weight),
-              self.running_mean:cdata(),
-              self.running_var:cdata(),
-              self.save_mean:cdata(),
-              self.save_std:cdata(),
-              self.train,
-              scale,
-              self.eps,
-              self.dnnPrimitives:cdata(),self.mkldnnInitOk)
-        else
-           input.THNN.BatchNormalization_backward(
-              input:cdata(),
-              gradOutput:cdata(),
-              THNN.optionalTensor(gradInput),
-              THNN.optionalTensor(gradWeight),
-              THNN.optionalTensor(gradBias),
-              THNN.optionalTensor(self.weight),
-              self.running_mean:cdata(),
-              self.running_var:cdata(),
-              self.save_mean:cdata(),
-              self.save_std:cdata(),
-              self.train,
-              scale,
-              self.eps)
-        end
-
-   --[[
-
-   if self.timerEnable then
-	self.timeBackward = self.timeBackward + (sys.clock() - startTime)
-   end
-   if self.timerEnable then
-        print("BatchNormalication  backward elementwiseTime = ",elementwiseTime - startTime)
-   end
-   ]]--
    return self.gradInput
 end
 
