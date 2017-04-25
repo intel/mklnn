@@ -185,6 +185,49 @@ void MKLNN_RealBatchNormalization_backward(
   THLongTensor *primitives,
   int initOk);
 
+static void MKLNN_RealCrossChannelLRN_init_forward(
+  THLongTensor *primitives,
+  int N,
+  int inC,
+  int inH,
+  int inW,
+  int size, 
+  float alpha, 
+  float beta, 
+  float k);
+
+static void MKLNN_RealCrossChannelLRN_init_backward(
+  THLongTensor *primitives,
+  int N,
+  int outC,
+  int outH,
+  int outW,
+  int size, 
+  float alpha, 
+  float beta, 
+  float k);
+
+void MKLNN_RealCrossChannelLRN_updateOutput(
+  THRealTensor *input, 
+  THRealTensor *output,
+  int size, 
+  float alpha, 
+  float beta, 
+  float k,
+  THLongTensor *primitives,
+  int initOk);
+
+void MKLNN_RealCrossChannelLRN_backward(
+  THRealTensor *input, 
+  THRealTensor *gradOutput, 
+  THRealTensor *gradInput,
+  int size, 
+  float alpha, 
+  float beta, 
+  float k,
+  THLongTensor *primitives,
+  int initOk);
+
 
 ]]
 

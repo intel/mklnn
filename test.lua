@@ -394,6 +394,64 @@ function mklnntest.SpatialBatchNormalization()
    end
 end
 
+function mklnntest.SpatialCrossMapLRNMKLDNN()
+   local inputSize = math.random(6,9)
+   local size = math.random(1,3)*2+1
+   local nbfeatures = math.random(3,8)
+   
+   local alpha = math.random(1,100)/100
+   local beta  = math.random(0,100)/100
+   local k = math.random(1,3)
+   
+   local oriModule = nn.SpatialCrossMapLRN(size, alpha, beta, k):float()
+   local dnnModule = mklnn.LRNMKLDNN(size, alpha, beta, k):float()
+   local batchSize = math.random(1,5)
+   local from = math.random(3,8)
+   local input = torch.rand(batchSize,from, inputSize, inputSize):float()
+   local input_clone = input:clone():float()
+   local oriOutput = oriModule:forward(input)
+   local dnnOutput = dnnModule:forward(input_clone)
+   
+   mytester:assertTensorEq(oriOutput, dnnOutput, 0.00001, 'SpatialCrossMapLRNMKLDNN output')
+   
+   if (PRINT_EN == 1) then 
+      print("SpatialCrossMapLRN MKLDNN >>>>>>>>")
+      local flatInput = torch.Tensor(input:nElement()):copy(input)
+      local flatOriOutput = torch.Tensor(oriOutput:nElement()):copy(oriOutput)
+      local flatDnnOutput = torch.Tensor(dnnOutput:nElement()):copy(dnnOutput)
+      local diff = flatDnnOutput-flatOriOutput
+      print('SpatialCrossMapLRN input')
+      print(flatInput)
+      print('SpatialCrossMapLRN oriOutput') 
+      print(flatOriOutput)
+      print('SpatialCrossMapLRN dnnOutput')
+      print(flatDnnOutput)
+      print('SpatialCrossMapLRN diff')
+      print(diff)    
+   end 
+   local gradOutput = oriOutput:clone():uniform(0,1)  --use original OP to aquire the size of output 
+   local gradOutput_clone = gradOutput:clone()
+   local oriGradInput = oriModule:backward(input, gradOutput)
+   local dnnGradInput = dnnModule:backward(input_clone, gradOutput_clone)
+   mytester:assertTensorEq(oriGradInput, dnnGradInput, 0.00001, 'SpatialCrossMapLRNMKLDNN gradInput')
+   if (PRINT_EN == 1) then 
+      print("SpatialCrossMapLRN MKLDNN <<<<<<<<")
+      local flatGradOutput = torch.Tensor(gradOutput:nElement()):copy(gradOutput)
+      local flatOriGradInput = torch.Tensor(oriGradInput:nElement()):copy(oriGradInput)
+      local flatDnnGradInput = torch.Tensor(dnnGradInput:nElement()):copy(dnnGradInput)
+      local diff = flatDnnGradInput-flatOriGradInput
+      print('SpatialCrossMapLRN gradOutput')
+      print(flatGradOutput)
+      print('SpatialCrossMapLRN oriGradInput')
+      print(flatOriGradInput)
+      print('SpatialCrossMapLRN dnnGradInput')
+      print(flatDnnGradInput)
+      print('SpatialCrossMapLRN diff')
+      print( diff)   
+   end  
+end
+
+
 
 mytester:add(mklnntest)
 jac = nn.Jacobian

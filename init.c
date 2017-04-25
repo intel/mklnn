@@ -22,6 +22,7 @@
 #include "src/ThresholdMKLDNN.c"
 #include "src/SpatialMaxPooling.c"
 #include "src/BatchNormalization.c"
+#include "src/LRN.c"
 #include "generateAllTypes.h"
 
 
