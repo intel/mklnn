@@ -394,7 +394,7 @@ function mklnntest.SpatialBatchNormalization()
    end
 end
 
-function mklnntest.SpatialCrossMapLRNMKLDNN()
+function mklnntest.SpatialCrossMapLRN()
    local inputSize = math.random(6,9)
    local size = math.random(1,3)*2+1
    local nbfeatures = math.random(3,8)
@@ -404,7 +404,7 @@ function mklnntest.SpatialCrossMapLRNMKLDNN()
    local k = math.random(1,3)
    
    local oriModule = nn.SpatialCrossMapLRN(size, alpha, beta, k):float()
-   local dnnModule = mklnn.LRNMKLDNN(size, alpha, beta, k):float()
+   local dnnModule = mklnn.LRN(size, alpha, beta, k):float()
    local batchSize = math.random(1,5)
    local from = math.random(3,8)
    local input = torch.rand(batchSize,from, inputSize, inputSize):float()
