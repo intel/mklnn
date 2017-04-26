@@ -5,8 +5,8 @@ local cdefs = [[
 
 
 void MKLNN_RealSpatialConvolution_forward(
-  THRealTensor *input,
-  THRealTensor *output,
+  THMKLRealTensor *input,
+  THMKLRealTensor *output,
   THRealTensor *weight,
   THRealTensor *bias,
   THRealTensor *finput,
@@ -23,9 +23,9 @@ void MKLNN_RealSpatialConvolution_forward(
 
 
 void MKLNN_RealSpatialConvolution_bwdData(
-  THRealTensor *input,
-  THRealTensor *gradOutput,
-  THRealTensor *gradInput,
+  THMKLRealTensor *input,
+  THMKLRealTensor *gradOutput,
+  THMKLRealTensor *gradInput,
   THRealTensor *weight,
   THRealTensor *bias,
   THRealTensor *finput,
@@ -41,8 +41,8 @@ void MKLNN_RealSpatialConvolution_bwdData(
   int group);
 
 void MKLNN_RealSpatialConvolution_bwdFilter(
-  THRealTensor *input,
-  THRealTensor *gradOutput,
+  THMKLRealTensor *input,
+  THMKLRealTensor *gradOutput,
   THRealTensor *gradWeight,
   THRealTensor *gradBias,
   THRealTensor *finput,

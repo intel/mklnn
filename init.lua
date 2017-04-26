@@ -1,4 +1,5 @@
 require 'nn'
+require 'mkltorch'
 mklnn= require 'mklnn.env'
 require('mklnn.ffi')
 
@@ -18,6 +19,9 @@ local typeMap = {
    ['torch.FloatTensor']   = 'Float',
    ['torch.DoubleTensor']  = 'Double',
    ['torch.LongTensor']    = 'Long',
+   ['torch.MKLFloatTensor']   = 'Float',
+   ['torch.MKLDoubleTensor']  = 'Double',
+   ['torch.MKLLongTensor']    = 'Long',
 
 }
 local getType = function(tensor)

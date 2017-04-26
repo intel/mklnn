@@ -24,6 +24,7 @@ function SpatialConvolution:__init(nInputPlane, nOutputPlane, kW, kH, dW, dH, pa
    self.gradWeight = torch.Tensor(nOutputPlane, nInputPlane*kH*kW/self.group)
    self.gradBias = torch.Tensor(nOutputPlane)
 
+
    self:reset()
 end
 
@@ -47,6 +48,7 @@ function SpatialConvolution:reset(stdv)
 end
 
 local function makeContiguous(self, input, gradOutput)
+--[[
    if not input:isContiguous() then
       self._input = self._input or input.new()
       self._input:resizeAs(input):copy(input)
@@ -59,6 +61,7 @@ local function makeContiguous(self, input, gradOutput)
 	 gradOutput = self._gradOutput
       end
    end
+]]--
    return input, gradOutput
 end
 
@@ -69,15 +72,19 @@ function SpatialConvolution:updateOutput(input)
       self.mkldnnInitOk = 0
    end
    self.dnnPrimitives = self.dnnPrimitives or torch.LongTensor(30)
+   self.output = self.output:mkl()
+   --self.output = torch.MKLFloatTensor()
 
-   self.finput = self.finput or input.new()
-   self.fgradInput = self.fgradInput or input.new()
+   self.finput = torch.FloatTensor()
+   self.fgradInput = torch.FloatTensor()
    if self.padding then
       self.padW = self.padding
       self.padH = self.padding
       self.padding = nil
    end
    input = makeContiguous(self, input)
+   print("forward input type = ", input:type())
+   print("forward output type = ", self.output:type())
    wrapper(getType(input),'SpatialConvolution_forward',
       input:cdata(),
       self.output:cdata(),

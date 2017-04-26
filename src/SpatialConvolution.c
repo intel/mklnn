@@ -149,7 +149,9 @@ static void MKLNN_(SpatialConvolution_init_forward)(
   primitives->storage->data[BUFFER_FORWARD_OUTPUT]      = (long long)buffer_forward_output;
 
 
+
 #if LOG_ENABLE
+  printf("cv_forward_input=%d,cv_forward_filter=%d,cv_forward_output=%d \n",cv_forward_input,cv_forward_filter,cv_forward_output);
   printf("SpatialConvolutionMM_MKLDNN_init_forward: end, sizeof(real)=%d\n",sizeof(real));
 #endif
 
@@ -378,8 +380,8 @@ static void MKLNN_(SpatialConvolution_init_bwdfilter)(
 
 
 void MKLNN_(SpatialConvolution_forward)(
-  THTensor *input,
-  THTensor *output,
+  THMKLTensor *input,
+  THMKLTensor *output,
   THTensor *weight,
   THTensor *bias,
   THTensor *finput,
@@ -425,8 +427,7 @@ void MKLNN_(SpatialConvolution_forward)(
   buffer_forward_bias 	= (real *)(primitives->storage->data[BUFFER_FORWARD_BIAS]);
   buffer_forward_output 	= (real *)(primitives->storage->data[BUFFER_FORWARD_OUTPUT]);
 
-
-  THTensor_(resize4d)(output, N, outC, outH, outW);
+  TH_MKL_(resize4d)(output, N, outC, outH, outW);
 #if LOG_ENABLE
   gettimeofday(&mid,NULL);
   fprintf(stderr, "SpatialConvolutionMM_MKLDNN_forward: start, m_conv_forward = 0x%x \n",m_conv_forward);
@@ -437,9 +438,9 @@ void MKLNN_(SpatialConvolution_forward)(
   fprintf(stderr, " cv_forward_input=0x%x,cv_forward_filter=0x%x,cv_forward_bias=0x%x,cv_forward_output=0x%x",cv_forward_input,cv_forward_filter,cv_forward_bias,cv_forward_output);
 #endif
   long long i = 0;
-  real * inPtr = THTensor_(data)(input);
+  real * inPtr = TH_MKL_(data)(input);
   real * filterPtr = THTensor_(data)(weight);
-  real * outPtr = THTensor_(data)(output);
+  real * outPtr = TH_MKL_(data)(output);
   real * biasPtr = THTensor_(data)(bias);
 
   real * resConv[dnnResourceNumber]={0};
@@ -509,14 +510,13 @@ void MKLNN_(SpatialConvolution_forward)(
   double duration1 = (end.tv_sec - start.tv_sec) * 1000 + (double)(end.tv_usec - start.tv_usec) /1000;
   fprintf(stderr,"	Convolution MKLDNN  forward time1 = %.2f ms \n",duration1);
 #endif
-
 }
 
 
 void MKLNN_(SpatialConvolution_bwdData)(
-  THTensor *input,
-  THTensor *gradOutput,
-  THTensor *gradInput,
+  THMKLTensor *input,
+  THMKLTensor *gradOutput,
+  THMKLTensor *gradInput,
   THTensor *weight,
   THTensor *bias,
   THTensor *finput,
@@ -593,20 +593,13 @@ void MKLNN_(SpatialConvolution_bwdData)(
     }
     if(cv_bwddata_input){
       resConv[dnnResourceDiffSrc] = buffer_bwddata_input;
-      gradInput->storageOffset = 0;
     }
     gettimeofday(&convert1,NULL);
     CHECK_ERR(dnnExecute_F32(m_conv_bwdData, (void**)resConv),err);	
     gettimeofday(&convert2,NULL);
 
     if(cv_bwddata_input){
-      if(gradInput->mkldnnLayout == 0){
-        int memSize = gradInput->storage->size;
-        THStorage_(free)(gradInput->storage);
-        gradInput->storage = THStorage_(newWithData)(buffer_bwddata_input,memSize);
-      }
-      gradInput->storage->data = buffer_bwddata_input;
-      THStorage_(setMKLDNN)(gradInput->storage);
+      TH_MKL_(setMKLdata)(buffer_bwddata_input);
     }
     gradInput->mkldnnLayout = (long long)primitives->storage->data[CONV_LAYOUT_BWDDATA_INPUT];
   }else if(sizeof(real) == sizeof(double)){
@@ -635,8 +628,8 @@ void MKLNN_(SpatialConvolution_bwdData)(
 }
 
 void MKLNN_(SpatialConvolution_bwdFilter)(
-  THTensor *input,
-  THTensor *gradOutput,
+  THMKLTensor *input,
+  THMKLTensor *gradOutput,
   THTensor *gradWeight,
   THTensor *gradBias,
   THTensor *finput,
@@ -684,7 +677,7 @@ void MKLNN_(SpatialConvolution_bwdFilter)(
 
 #if LOG_ENABLE
   fprintf(stderr, "SpatialConvolutionMM_MKLDNN_bwdFilter: start. \n");
-  fprintf(stderr, "	input->nDimension = %d, finput->nDimension = %d, gradWeight->nDimension = %d\n", input->nDimension,finput->nDimension,gradWeight->nDimension);
+  //fprintf(stderr, "	input->nDimension = %d, finput->nDimension = %d, gradWeight->nDimension = %d\n", input->nDimension,finput->nDimension,gradWeight->nDimension);
   fprintf(stderr, "	input->size[0]=%d,input->size[1]=%d,input->size[2]=%d,input->size[3]=%d \n", input->size[0],input->size[1],input->size[2],input->size[3]);	
   fprintf(stderr, "	output->size[0]=%d,output->size[1]=%d,output->size[2]=%d,output->size[3]=%d \n", gradOutput->size[0],gradOutput->size[1],gradOutput->size[2],gradOutput->size[3]);
   fprintf(stderr, "	weight->size[0]=%d,weight->size[1]=%d\n", gradWeight->size[0],gradWeight->size[1]);
