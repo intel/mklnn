@@ -23,31 +23,33 @@ static void MKLNN_(BatchNormalization_init_forward)(
    dnnLayout_t lt_user_input = NULL;
 
    if(primitives->storage->data[BN_LAYOUT_INPUT] == 0) {
-      CHECK_ERR( dnnLayoutCreate_F32(&lt_user_input, dimension, inputSize, inputStrides) , err );
-      #if CONVERSION_LOG
-      fprintf(stderr ,"MKLDNN BN get input layout FAIL......\n");
-      #endif
+      CHECK_ERR( dnnLayoutCreate_F32(&lt_user_input, dimension, inputSize, inputStrides), err );
+#if CONVERSION_LOG
+      fprintf(stderr,"MKLDNN BN get input layout FAIL......\n");
+#endif
    }
    else {
       lt_user_input = (dnnLayout_t)primitives->storage->data[BN_LAYOUT_INPUT];
-      #if CONVERSION_LOG
-      fprintf(stderr ,"MKLDNN BN get input layout OK\n");
-      #endif
+#if CONVERSION_LOG
+      fprintf(stderr,"MKLDNN BN get input layout OK\n");
+#endif
    }
 
    CHECK_ERR( dnnBatchNormalizationCreateForward_F32(&bn_forward,NULL,lt_user_input,eps), err );
    CHECK_ERR( dnnBatchNormalizationCreateBackwardData_F32(&bn_backward,NULL,lt_user_input,eps), err );
    CHECK_ERR( dnnBatchNormalizationCreateBackwardScaleShift_F32(&bn_bwd_scaleshift,NULL,lt_user_input,eps), err );
-	
+
 
    dnnLayout_t lt_bn_forward_workspace,lt_bn_forward_scaleshift,lt_bn_forward_output,lt_bn_backward_input;
-   real * buffer_forward_workspace = NULL; real * buffer_forward_scaleshift = NULL;
-   real * buffer_forward_output = NULL; real * buffer_backward_input = NULL;
+   real * buffer_forward_workspace = NULL;
+   real * buffer_forward_scaleshift = NULL;
+   real * buffer_forward_output = NULL;
+   real * buffer_backward_input = NULL;
    dnnLayoutCreateFromPrimitive_F32(&lt_bn_forward_workspace, bn_forward, dnnResourceWorkspace);
    dnnLayoutCreateFromPrimitive_F32(&lt_bn_forward_output, bn_forward, dnnResourceDst);
    dnnLayoutCreateFromPrimitive_F32(&lt_bn_forward_scaleshift, bn_forward, dnnResourceScaleShift);
    dnnLayoutCreateFromPrimitive_F32(&lt_bn_backward_input, bn_backward, dnnResourceDiffSrc);
-		
+
 
    CHECK_ERR( dnnAllocateBuffer_F32((void**)(&buffer_forward_workspace), lt_bn_forward_workspace), err );
    CHECK_ERR( dnnAllocateBuffer_F32((void**)(&buffer_forward_scaleshift), lt_bn_forward_scaleshift), err );
@@ -57,24 +59,24 @@ static void MKLNN_(BatchNormalization_init_forward)(
    int size1 = dnnLayoutGetMemorySize_F32(lt_bn_forward_output);
    int size2 = inW*inH*inC*N*4;
    if(size1 == size2) {
-      #if CONVERSION_LOG
-      fprintf(stderr ,"MKLDNN BN forward ouput layout match OK\n");
-      #endif
+#if CONVERSION_LOG
+      fprintf(stderr,"MKLDNN BN forward ouput layout match OK\n");
+#endif
    }
    else {
       CHECK_ERR( dnnAllocateBuffer_F32((void**)(&buffer_forward_output), lt_bn_forward_output), err );
-      fprintf(stderr ,"MKLDNN BN forward ouput layout match FAIL, size1 = %d, size2 = %d \n", size1, size2);
+      fprintf(stderr,"MKLDNN BN forward ouput layout match FAIL, size1 = %d, size2 = %d \n", size1, size2);
    }
 
    size1 = dnnLayoutGetMemorySize_F32(lt_bn_backward_input);
    if(size1 == size2) {
-      #if CONVERSION_LOG
-      fprintf(stderr ,"MKLDNN MaxPooling bwddata input layout match OK\n");
-      #endif
+#if CONVERSION_LOG
+      fprintf(stderr,"MKLDNN MaxPooling bwddata input layout match OK\n");
+#endif
    }
    else {
       CHECK_ERR( dnnAllocateBuffer_F32((void**)(&buffer_backward_input), lt_bn_backward_input), err );
-      fprintf(stderr ,"MKLDNN MaxPooling bwddata input layout match FAIL, size1 = %d, size2 = %d \n", size1, size2);
+      fprintf(stderr,"MKLDNN MaxPooling bwddata input layout match FAIL, size1 = %d, size2 = %d \n", size1, size2);
    }
 
    //save the dnnPrimitive to THTensor(long int array)
@@ -108,20 +110,21 @@ static void MKLNN_(BatchNormalization_init_backward)(
    dnnLayout_t lt_user_output,lt_bn_backward_output=NULL;
 
    if(primitives->storage->data[BN_LAYOUT_OUTPUT] == 0) {
-      CHECK_ERR( dnnLayoutCreate_F32(&lt_user_output, dimension, outputSize, outputStrides) , err );
-      #if CONVERSION_LOG
-      fprintf(stderr ,"MKLDNN BN get output layout FAIL......\n");
-      #endif
+      CHECK_ERR( dnnLayoutCreate_F32(&lt_user_output, dimension, outputSize, outputStrides), err );
+#if CONVERSION_LOG
+      fprintf(stderr,"MKLDNN BN get output layout FAIL......\n");
+#endif
    }
    else {
       lt_user_output = (dnnLayout_t)primitives->storage->data[BN_LAYOUT_OUTPUT];
-      #if CONVERSION_LOG
-      fprintf(stderr ,"MKLDNN BN get output layout OK\n");
-      #endif
+#if CONVERSION_LOG
+      fprintf(stderr,"MKLDNN BN get output layout OK\n");
+#endif
    }
 
    dnnLayoutCreateFromPrimitive_F32(&lt_bn_backward_output, bn_backward, dnnResourceDiffDst);
-   dnnPrimitive_t cv_backward_output = NULL;real * buffer_backward_output = NULL;
+   dnnPrimitive_t cv_backward_output = NULL;
+   real * buffer_backward_output = NULL;
    //backward conversion init
    CHECK_ERR( MKLNN_(init_conversion)(&cv_backward_output, &buffer_backward_output, lt_bn_backward_output, lt_user_output), err );
 
@@ -132,16 +135,16 @@ static void MKLNN_(BatchNormalization_init_backward)(
 
 void MKLNN_(BatchNormalization_updateOutput)(
    //THNNState *state,
-   THTensor *input, 
+   THTensor *input,
    THTensor *output,
-   THTensor *weight, 
+   THTensor *weight,
    THTensor *bias,
-   THTensor *running_mean, 
+   THTensor *running_mean,
    THTensor *running_var,
-   THTensor *save_mean, 
+   THTensor *save_mean,
    THTensor *save_std,
-   bool train, 
-   double momentum, 
+   bool train,
+   double momentum,
    double eps,
    THLongTensor *primitives,
    int initOk)
@@ -167,13 +170,13 @@ void MKLNN_(BatchNormalization_updateOutput)(
 
    //release the original buffer, replace it with the internal buffer
    /*	if(output->mkldnnLayout == 0)
-	{
-		int memSize = output->storage->size;
-		THStorage_(free)(output->storage);
-		output->storage = THStorage_(newWithData)(buffer_forward_output,memSize);
-	}
-	output->storage->data = buffer_forward_output;
-	output->storageOffset = 0;
+   {
+   	int memSize = output->storage->size;
+   	THStorage_(free)(output->storage);
+   	output->storage = THStorage_(newWithData)(buffer_forward_output,memSize);
+   }
+   output->storage->data = buffer_forward_output;
+   output->storageOffset = 0;
    */
    //fprintf(stderr, "BN MKLDNN, nInput = %d \n", nInput);
    int i = 0;
@@ -191,28 +194,28 @@ void MKLNN_(BatchNormalization_updateOutput)(
    CHECK_ERR( dnnExecute_F32(bn_forward, (void*)BatchNorm_res), err );
    output->mkldnnLayout = (long long)primitives->storage->data[BN_LAYOUT_FORWARD_OUTPUT];
    //output->storageOffset = 0;
-   #if LOG_ENABLE
+#if LOG_ENABLE
    gettimeofday(&end,NULL);
    double duration1 = (mid.tv_sec - start.tv_sec) * 1000 + (double)(mid.tv_usec - start.tv_usec) /1000;
    double duration2 = (end.tv_sec - mid.tv_sec) * 1000 + (double)(end.tv_usec - mid.tv_usec) /1000;
    fprintf(stderr,"	BatchNorm MKLDNN forward time1 = %.2f ms, time2 = %.2f ms \n",duration1,duration2);
-   #endif
+#endif
 }
 
 void MKLNN_(BatchNormalization_backward)(
-  //THNNState *state, 
-   THTensor *input, 
-   THTensor *gradOutput, 
+   //THNNState *state,
+   THTensor *input,
+   THTensor *gradOutput,
    THTensor *gradInput,
-   THTensor *gradWeight, 
-   THTensor *gradBias, 
+   THTensor *gradWeight,
+   THTensor *gradBias,
    THTensor *weight,
-   THTensor *running_mean, 
+   THTensor *running_mean,
    THTensor *running_var,
-   THTensor *save_mean, 
+   THTensor *save_mean,
    THTensor *save_std,
-   bool train, 
-   double scale, 
+   bool train,
+   double scale,
    double eps,
    THLongTensor *primitives,
    int initOk)
@@ -220,7 +223,7 @@ void MKLNN_(BatchNormalization_backward)(
    long nInput = THTensor_(size)(input, 1);
    long f,n = THTensor_(nElement)(input) / nInput;
    struct timeval start,mid,end;
-   gettimeofday(&start,NULL);    
+   gettimeofday(&start,NULL);
 
    dnnError_t err;
    int inC = input->size[1];
@@ -261,14 +264,14 @@ void MKLNN_(BatchNormalization_backward)(
       real * buffer_backward_output = (real *) (primitives->storage->data[BUFFER_BN_BACKWARD_OUTPUT]);
       real * buffer_backward_input = (real *) (primitives->storage->data[BUFFER_BN_BACKWARD_INPUT]);
       /*
-		if(gradInput->mkldnnLayout == 0)
-		{
-			int memSize = gradInput->storage->size;
-			THStorage_(free)(gradInput->storage);
-			gradInput->storage = THStorage_(newWithData)(buffer_backward_input,memSize);
-		}
-		gradInput->storage->data = buffer_backward_input;
-		gradInput->storageOffset = 0;
+      if(gradInput->mkldnnLayout == 0)
+      {
+      	int memSize = gradInput->storage->size;
+      	THStorage_(free)(gradInput->storage);
+      	gradInput->storage = THStorage_(newWithData)(buffer_backward_input,memSize);
+      }
+      gradInput->storage->data = buffer_backward_input;
+      gradInput->storageOffset = 0;
        */
       void* BatchNorm_res[dnnResourceNumber];
       BatchNorm_res[dnnResourceSrc] = THTensor_(data)(input);
@@ -277,9 +280,9 @@ void MKLNN_(BatchNormalization_backward)(
       BatchNorm_res[dnnResourceWorkspace] = buffer_forward_workspace;
       BatchNorm_res[dnnResourceScaleShift] = buffer_forward_scaleshift;
       if(cv_backward_output) {
-         #if CONVERSION_LOG
+#if CONVERSION_LOG
          fprintf(stderr, "	BN backward output conversion... \n");
-         #endif
+#endif
          BatchNorm_res[dnnResourceDiffDst] = buffer_backward_output;
          CHECK_ERR( dnnConversionExecute_F32(cv_backward_output, THTensor_(data)(gradOutput), BatchNorm_res[dnnResourceDiffDst]), err );
       }
@@ -290,12 +293,12 @@ void MKLNN_(BatchNormalization_backward)(
       gradInput->mkldnnLayout = (long long)primitives->storage->data[BN_LAYOUT_BACKWARD_INPUT];
       //gradInput->storageOffset = 0;
    }
-   #if LOG_ENABLE
+#if LOG_ENABLE
    gettimeofday(&end,NULL);
    double duration1 = (mid.tv_sec - start.tv_sec) * 1000 + (double)(mid.tv_usec - start.tv_usec) /1000;
    double duration2 = (end.tv_sec - mid.tv_sec) * 1000 + (double)(end.tv_usec - mid.tv_usec) /1000;
    fprintf(stderr,"        BatchNorm MKLDNN backward time1 = %.2f ms, time2 = %.2f ms \n",duration1,duration2);
-   #endif 
+#endif
 }
 
 #endif
