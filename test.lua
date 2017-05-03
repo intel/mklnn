@@ -106,7 +106,7 @@ function mklnntest.ReLU()
    local input = torch.randn(batch, from, outi, outj):float()
    local gradOutput = torch.randn(batch, from, outi, outj):float()
    local input_clone = input:clone():float():mkl()--add
-   local gradOutput_clone = gradOutput:clone():float()
+   local gradOutput_clone = gradOutput:clone():float():mkl()--add
    local oriModule = nn.ReLU():float()
    local dnnModule = mklnn.ReLU():float()
    local oriOutput = oriModule:forward(input)
