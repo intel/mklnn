@@ -147,8 +147,8 @@ static void MKLNN_(SpatialConvolution_Relu_init_backward)(
 }
 
 void MKLNN_(Threshold_updateOutput)(
-   THTensor *input,
-   THTensor *output,
+   THMKLTensor *input,
+   THMKLTensor *output,
    real threshold,
    real val,
    bool inplace,
@@ -212,9 +212,9 @@ void MKLNN_(Threshold_updateOutput)(
 }
 
 void MKLNN_(Threshold_updateGradInput)(
-   THTensor *input,
-   THTensor *gradOutput,
-   THTensor *gradInput,
+   THMKLTensor *input,
+   THMKLTensor *gradOutput,
+   THMKLTensor *gradInput,
    real threshold,
    bool inplace,
    THLongTensor *primitives,

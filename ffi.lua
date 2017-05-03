@@ -59,17 +59,17 @@ void MKLNN_RealSpatialConvolution_bwdFilter(
   int group);
 
 void MKLNN_RealThreshold_updateGradInput(
-  THRealTensor *input,
-  THRealTensor *gradOutput,
-  THRealTensor *gradInput,
+  THMKLRealTensor *input,
+  THMKLRealTensor *gradOutput,
+  THMKLRealTensor *gradInput,
   float threshold,
   bool inplace,
   THLongTensor *primitives,
   int initOk);
 
 void MKLNN_RealThreshold_updateOutput(
-  THRealTensor *input,
-  THRealTensor *output,
+  THMKLRealTensor *input,
+  THMKLRealTensor *output,
   float threshold,
   float val,
   bool inplace,

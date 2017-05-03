@@ -22,7 +22,7 @@ function Threshold:updateOutput(input)
    self:updateForLoadSnapshot()
    self.dnnPrimitives = self.dnnPrimitives or torch.LongTensor(11)
    self.mkldnnInitOk = 0
-
+   self.output = self.output:mkl()--add
    self:validateParameters()
    wrapper(getType(input),'Threshold_updateOutput',
            input:cdata(),

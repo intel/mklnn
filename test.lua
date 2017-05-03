@@ -97,7 +97,7 @@ function mklnntest.SpatialConvolutionMKLDNN_g1()
 ]]--
 end
 
---[[
+
 function mklnntest.ReLU()
    local batch = math.random(2,5)
    local from = math.random(1,5)
@@ -105,7 +105,7 @@ function mklnntest.ReLU()
    local outj = outi
    local input = torch.randn(batch, from, outi, outj):float()
    local gradOutput = torch.randn(batch, from, outi, outj):float()
-   local input_clone = input:clone():float()
+   local input_clone = input:clone():float():mkl()--add
    local gradOutput_clone = gradOutput:clone():float()
    local oriModule = nn.ReLU():float()
    local dnnModule = mklnn.ReLU():float()
@@ -146,7 +146,7 @@ function mklnntest.ReLU()
       print( diff)  
    end  
 end
- 
+--[[ 
 function mklnntest.SpatialConvolutionMKLDNN_g2()
 
   -- batch

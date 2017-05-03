@@ -19,9 +19,11 @@
 
 
 #include "src/SpatialConvolution.c"
-#include "generateAllTypes.h"
-/*
 #include "src/ThresholdMKLDNN.c"
+
+#include "generateAllTypes.h"
+
+/*
 #include "generateAllTypes.h"
 #include "src/SpatialMaxPooling.c"
 #include "generateAllTypes.h"
