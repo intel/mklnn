@@ -24,6 +24,8 @@ function Threshold:updateOutput(input)
    self.mkldnnInitOk = 0
    self.output = self.output:mkl()--add
    self:validateParameters()
+   print("input type = ", input:type())
+   print("output type = ", self.output:type())
    wrapper(getType(input),'Threshold_updateOutput',
            input:cdata(),
            self.output:cdata(),

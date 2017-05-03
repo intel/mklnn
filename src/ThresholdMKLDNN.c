@@ -165,13 +165,13 @@ void MKLNN_(Threshold_updateOutput)(
    //fprintf(stderr, "MKLDNN Relu forward start:inplace=%d, N=%d,inC=%d,inH=%d,inW=%d, inPtr=%d, outPtr=%d \n",inplace,N,inC,inH,inW,inPtr,outPtr);
 #endif
 
-   THTensor_(resizeAs)(output, input);
+   TH_MKL_(resizeAs)(output, input);
    int N = input->size[0];
    int inC = input->size[1];
    int inH = input->size[2];
    int inW = input->size[3];
-   real * inPtr = THTensor_(data)(input);
-   real * outPtr = THTensor_(data)(output);
+   real * inPtr = TH_MKL_(data)(input);
+   real * outPtr = TH_MKL_(data)(output);
    int outC = output->size[1];
    int outH = output->size[2];
    int outW = output->size[3];
@@ -196,7 +196,7 @@ void MKLNN_(Threshold_updateOutput)(
    relu1 = (dnnPrimitive_t) (primitives->storage->data[RELU_FORWARD]);
    real *resRelu1[dnnResourceNumber];
    resRelu1[dnnResourceSrc] = inPtr;
-   resRelu1[dnnResourceDst] = THTensor_(data)(output);
+   resRelu1[dnnResourceDst] = TH_MKL_(data)(output);
    CHECK_ERR( dnnExecute_F32(relu1, (void**)resRelu1), err );
    if(input->mkldnnLayout != 0) {
       output->mkldnnLayout = primitives->storage->data[RELU_LAYOUT_FORWARD_OUTPUT];
