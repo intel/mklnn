@@ -17,7 +17,7 @@ function SpatialMaxPooling:__init(kW, kH, dW, dH, padW, padH)
    self.padW = padW or 0
    self.padH = padH or 0
 
-   self:setEngine(1)
+   --self:setEngine(1)
 
 
    self.ceil_mode = false
@@ -35,18 +35,30 @@ function SpatialMaxPooling:floor()
 end
 
 function SpatialMaxPooling:updateOutput(input)
-   self:updateForLoadSnapshot()
+   --self:updateForLoadSnapshot()
+   --[[
    if self.initStep == 0 then
       self.initStep = 1
       self.dnnPrimitives = torch.LongTensor(16)
    else
-	self.mkldnnInitOk = 1
+      self.mkldnnInitOk = 1
    end
+   ]]--
+
+   if self.dnnPrimitives then
+      self.mkldnnInitOk = 1
+   else
+      self.mkldnnInitOk = 0
+   end
+   self.dnnPrimitives = self.dnnPrimitives or torch.LongTensor(16)
+
    self.indices = self.indices or input.new()
    -- backward compatibility
    self.ceil_mode = self.ceil_mode or false
    self.padW = self.padW or 0
    self.padH = self.padH or 0
+   self.output = self.output:mkl() --add
+   self.indices = self.indices:mkl() --add
     wrapper(getType(input),'SpatialMaxPooling_updateOutput',
        input:cdata(),
        self.output:cdata(),

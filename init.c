@@ -20,7 +20,7 @@
 
 #include "src/SpatialConvolution.c"
 #include "src/ThresholdMKLDNN.c"
-
+#include "src/SpatialMaxPooling.c"
 #include "generateAllTypes.h"
 
 /*

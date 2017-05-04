@@ -254,7 +254,7 @@ function mklnntest.SpatialConvolutionMKLDNN_g2()
       print( diff)   
    end  
 end
-
+]]--
 function mklnntest.SpatialMaxPooling()
   for _,ceil_mode in pairs({true,false}) do
     local from = math.random(1,5)
@@ -279,7 +279,7 @@ function mklnntest.SpatialMaxPooling()
 		    
     local oriModule = nn.SpatialMaxPooling(ki,kj,si,sj,padW,padH):float()
     local dnnModule = mklnn.SpatialMaxPooling(ki,kj,si,sj,padW,padH):float()
-		   
+
     if ceil_mode then 
       oriModule:ceil() 
       dnnModule:ceil()
@@ -288,11 +288,13 @@ function mklnntest.SpatialMaxPooling()
       dnnModule:floor()
     end
 	  
-    local input_clone = input:clone():float()
+    local input_clone = input:clone():float():mkl()
     local gradOutput_clone = gradOutput:clone():float()
 
     local oriOutput = oriModule:forward(input)
     local dnnOutput = dnnModule:forward(input_clone)
+    print("type output = ",dnnOutput:type())
+    dnnOutput = dnnOutput:th()
     mytester:assertTensorEq(oriOutput, dnnOutput, 0.00001, 'SpatialMaxPoolingMKLDNN output')
 
     if (PRINT_EN == 1) then 
@@ -309,7 +311,8 @@ function mklnntest.SpatialMaxPooling()
       print(flatDnnOutput)
       print('SpatialMaxPooling diff')
       print(diff)    
-    end  
+    end 
+--[[ 
     local oriGradInput = oriModule:backward(input, gradOutput)
     local dnnGradInput = dnnModule:backward(input_clone, gradOutput_clone)
     mytester:assertTensorEq(oriGradInput, dnnGradInput, 0.00001, 'SpatialMaxPoolingMKLDNN gradInput')
@@ -327,10 +330,11 @@ function mklnntest.SpatialMaxPooling()
       print(flatDnnGradInput)
       print('SpatialMaxPooling diff')
       print(diff)   
-    end  
+    end 
+]]-- 
   end
 end
-
+--[[
 function mklnntest.SpatialBatchNormalization()
    local planes = torch.random(1,6)
    local size = { torch.random(2, 6), planes }

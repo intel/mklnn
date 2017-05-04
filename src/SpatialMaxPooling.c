@@ -18,10 +18,11 @@ static void MKLNN_(SpatialMaxPooling_init_forward)(
    int padW,
    int outC,
    int outH,
-   int outW)
+   int outW,
+   int ceilmode)
 {
 #if LOG_ENABLE
-   fprintf(stderr,"	SpatialMaxPooling_MKLDNN_init_forward start, N=%d,inC=%d,inH=%d,inW=%d,kH=%d,kW=%d,dH=%d,dW=%d,padH=%d,padW=%d,outC=%d,outH=%d,outW=%d\n",N,inC,inH,inW,kH,kW,dH,dW,padH,padW,outC,outH,outW );
+   fprintf(stderr,"	SpatialMaxPooling_MKLDNN_init_forward start, N=%d,inC=%d,inH=%d,inW=%d,kH=%d,kW=%d,dH=%d,dW=%d,padH=%d,padW=%d,outC=%d,outH=%d,outW=%d,ceilmode=%d\n",N,inC,inH,inW,kH,kW,dH,dW,padH,padW,outC,outH,outW,ceilmode );
 #endif
    dnnError_t err;
 
@@ -33,7 +34,7 @@ static void MKLNN_(SpatialMaxPooling_init_forward)(
 
    size_t kernelSize[2] = { kH, kW };
    size_t kernelStride[2] = { dH, dW };
-   int pad[dimension] = 	{-padW,-padH,-padW,-padH};
+
 
    real * resPool1[dnnResourceNumber] = {0};
    dnnLayout_t lt_user_input = NULL,lt_user_output=NULL;
@@ -59,8 +60,15 @@ static void MKLNN_(SpatialMaxPooling_init_forward)(
    dnnPrimitive_t pool1 = NULL;
    dnnPrimitive_t pool_bwd = NULL;
 #if NEW_INTERFACE
+   if(ceilmode){
+   int pad[dimension] = 	{-padW,-padH};
+   CHECK_ERR( dnnPoolingCreateForward_F32(&pool1, attributes, dnnAlgorithmPoolingMax,lt_user_input, kernelSize, kernelStride, pad, dnnBorderZeros), err );
+   CHECK_ERR( dnnPoolingCreateBackward_F32(&pool_bwd,attributes,dnnAlgorithmPoolingMax,lt_user_input, kernelSize, kernelStride, pad,dnnBorderZeros), err );
+   }else{
+   int pad[dimension] = 	{-padW,-padH,-padW,-padH};
    CHECK_ERR( dnnPoolingCreateForward_F32(&pool1, attributes, dnnAlgorithmPoolingMax,lt_user_input, kernelSize, kernelStride, pad, dnnBorderZerosAsymm), err );
    CHECK_ERR( dnnPoolingCreateBackward_F32(&pool_bwd,attributes,dnnAlgorithmPoolingMax,lt_user_input, kernelSize, kernelStride, pad,dnnBorderZerosAsymm), err );
+   }
 #endif
    dnnLayout_t lt_pool_forward_output = NULL,lt_pool_forward_input = NULL,lt_pool_forward_workspace = NULL;
    dnnPrimitive_t cv_forward_input = NULL,cv_forward_output = NULL;
@@ -208,9 +216,9 @@ static void MKLNN_(SpatialMaxPooling_init_backward)(
 
 void MKLNN_(SpatialMaxPooling_updateOutput)(
    //THNNState *state,
-   THTensor *input,
-   THTensor *output,
-   THTensor *indices,
+   THMKLTensor *input,
+   THMKLTensor *output,
+   THMKLTensor *indices,
    int kW,
    int kH,
    int dW,
@@ -232,10 +240,11 @@ void MKLNN_(SpatialMaxPooling_updateOutput)(
    real *input_data;
    real *output_data;
    real *indices_data;
-
-   THArgCheck(input->nDimension == 3 || input->nDimension == 4, 2, "3D or 4D (batch mode) tensor expected");
-
-   if (input->nDimension == 4) {
+   //change
+   printf("input->tensor->nDimension = %d ........\n",input->tensor->nDimension);
+   THArgCheck(input->tensor->nDimension == 3 || input->tensor->nDimension == 4, 2, "3D or 4D (batch mode) tensor expected");
+   //change
+   if (input->tensor->nDimension == 4) {
       nbatch = input->size[0];
       dimw++;
       dimh++;
@@ -267,13 +276,15 @@ void MKLNN_(SpatialMaxPooling_updateOutput)(
 
    /* get contiguous input */
    input = THTensor_(newContiguous)(input);
-   THTensor_(resize4d)(output, nbatch, nslices, oheight, owidth);
+   //THTensor_(resize4d)(output, nbatch, nslices, oheight, owidth);
+   TH_MKL_(resize4d)(output, nbatch, nslices, oheight, owidth);
    /* indices will contain the locations for each output point */
-   THTensor_(resize4d)(indices, nbatch, nslices, oheight, owidth);
+   //THTensor_(resize4d)(indices, nbatch, nslices, oheight, owidth);
+   TH_MKL_(resize4d)(indices, nbatch, nslices, oheight, owidth);
 
-   input_data = THTensor_(data)(input);
-   output_data = THTensor_(data)(output);
-   indices_data = THTensor_(data)(indices);
+   input_data = TH_MKL_(data)(input);
+   output_data = TH_MKL_(data)(output);
+   indices_data = TH_MKL_(data)(indices);
 
    /**************************************MKLDNN interface*****************************************/
    struct timeval start,end;
@@ -291,7 +302,7 @@ void MKLNN_(SpatialMaxPooling_updateOutput)(
 
    if(initOk == 0) {
       primitives->storage->data[POOLING_LAYOUT_INPUT] = (long long)input->mkldnnLayout;
-      MKLNN_(SpatialMaxPooling_init_forward)(primitives,N,inC,inH,inW,kH,kW,dH,dW,padH,padW,outC,outH,outW);
+      MKLNN_(SpatialMaxPooling_init_forward)(primitives,N,inC,inH,inW,kH,kW,dH,dW,padH,padW,outC,outH,outW,ceil_mode);
    }
 
    dnnPrimitive_t cv_forward_input = NULL,cv_forward_output = NULL;
@@ -338,15 +349,15 @@ void MKLNN_(SpatialMaxPooling_updateOutput)(
    fprintf(stderr,"	MaxPooling MKLDNN time forward = %.2f ms\n",duration );
 #endif
    /* cleanup */
-   THTensor_(free)(input);
+   TH_MKL_(free)(input);
 }
 
 void MKLNN_(SpatialMaxPooling_updateGradInput)(
    //THNNState *state,
-   THTensor *input,
-   THTensor *gradOutput,
-   THTensor *gradInput,
-   THTensor *indices,
+   THMKLTensor *input,
+   THMKLTensor *gradOutput,
+   THMKLTensor *gradInput,
+   THMKLTensor *indices,
    int kW,
    int kH,
    int dW,
@@ -374,8 +385,8 @@ void MKLNN_(SpatialMaxPooling_updateGradInput)(
    /* resize */
    THTensor_(resizeAs)(gradInput, input);
    THTensor_(zero)(gradInput);
-
-   if (input->nDimension == 4) {
+   //change
+   if (input->tensor->nDimension == 4) {
       nbatch = input->size[0];
       dimw++;
       dimh++;
@@ -392,9 +403,9 @@ void MKLNN_(SpatialMaxPooling_updateGradInput)(
    gradInput_data = THTensor_(data)(gradInput);
    gradOutput_data = THTensor_(data)(gradOutput);
    indices_data = THTensor_(data)(indices);
-
+   //change
    /* backprop */
-   if (input->nDimension == 3) {
+   if (input->tensor->nDimension == 3) {
       MKLNN_(SpatialMaxPooling_updateGradInput_frame)(
          gradInput_data,
          gradOutput_data,
