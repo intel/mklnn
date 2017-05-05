@@ -73,7 +73,6 @@ function SpatialConvolution:updateOutput(input)
    end
    self.dnnPrimitives = self.dnnPrimitives or torch.LongTensor(30)
    self.output = self.output:mkl()
-   --self.output = torch.MKLFloatTensor()
 
    self.finput = torch.FloatTensor()
    self.fgradInput = torch.FloatTensor()
