@@ -83,8 +83,6 @@ function SpatialConvolution:updateOutput(input)
       self.padding = nil
    end
    input = makeContiguous(self, input)
-   print("forward input type = ", input:type())
-   print("forward output type = ", self.output:type())
    wrapper(getType(input),'SpatialConvolution_forward',
       input:cdata(),
       self.output:cdata(),
@@ -103,6 +101,7 @@ end
 function SpatialConvolution:updateGradInput(input, gradOutput)
    if self.gradInput then
       input, gradOutput = makeContiguous(self, input, gradOutput)
+      self.gradInput = self.gradInput:mkl()
       wrapper(getType(input),'SpatialConvolution_bwdData',
          input:cdata(),
          gradOutput:cdata(),

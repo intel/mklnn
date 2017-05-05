@@ -48,7 +48,7 @@ function mklnntest.SpatialConvolutionMKLDNN_g1()
    local input = torch.randn(batch,from,inj,ini):float()
    local gradOutput = torch.randn(batch,to,outj,outi):float()
    local input_clone = input:clone():float():mkl()
-   local gradOutput_clone = gradOutput:clone():float()
+   local gradOutput_clone = gradOutput:clone():float():mkl()
    
    local oriModule = nn.SpatialConvolution(from, to, ki, kj, si, sj):float()
    local dnnModule = mklnn.SpatialConvolution(from, to, ki, kj, si, sj):float()
@@ -60,7 +60,6 @@ function mklnntest.SpatialConvolutionMKLDNN_g1()
    --dnnOutput.THNN.MKLDNN_ConvertLayoutBackToNCHW(dnnOutput:cdata(), dnnprimitives:cdata(),0,0)
    dnnOutput = dnnOutput:th()
    mytester:assertTensorEq(oriOutput, dnnOutput, 0.00001, 'SpatialConvolutionMKLNN g1 output')
---[[   
    if (PRINT_EN == 1) then 
       print("SpatialConvolution g1 MKLNN >>>>>>>>")
       local flatInput = torch.Tensor(input:nElement()):copy(input)
@@ -78,6 +77,7 @@ function mklnntest.SpatialConvolutionMKLDNN_g1()
    end  
    local oriGradInput = oriModule:backward(input, gradOutput)
    local dnnGradInput = dnnModule:backward(input_clone, gradOutput_clone)
+   dnnGradInput = dnnGradInput:th()
    mytester:assertTensorEq(oriGradInput, dnnGradInput, 0.00001, 'SpatialConvolution g1 gradInput')
    if (PRINT_EN == 1) then 
       print("SpatialConvolution g1 MKLNN <<<<<<<<")
@@ -94,7 +94,6 @@ function mklnntest.SpatialConvolutionMKLDNN_g1()
       print('SpatialConvolution diff')
       print( diff)   
    end 
-]]--
 end
 
 

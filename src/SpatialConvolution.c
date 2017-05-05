@@ -577,7 +577,7 @@ void MKLNN_(SpatialConvolution_bwdData)(
   buffer_bwddata_output 	= (real *)(primitives->storage->data[BUFFER_BWDDATA_OUTPUT]);
   real * buffer_forward_filter 	= (real *)(primitives->storage->data[BUFFER_FORWARD_FILTER]);
 
-  THTensor_(resizeAs)(gradInput, input);
+  TH_MKL_(resizeAs)(gradInput, input);
   gettimeofday(&mid2,NULL);
 #if LOG_ENABLE
   gettimeofday(&mid3,NULL);
@@ -586,9 +586,9 @@ void MKLNN_(SpatialConvolution_bwdData)(
   fprintf(stderr, "	output->size[0]=%d,output->size[1]=%d,output->size[2]=%d,output->size[3]=%d \n", gradOutput->size[0],gradOutput->size[1],gradOutput->size[2],gradOutput->size[3]);
   fprintf(stderr, "	weight->size[0]=%d,weight->size[1]=%d\n", weight->size[0],weight->size[1]);
 #endif
-  real * inPtr = THTensor_(data)(gradInput);
+  real * inPtr = TH_MKL_(data)(gradInput);
   real * filterPtr = THTensor_(data)(weight);
-  real * outPtr = THTensor_(data)(gradOutput);
+  real * outPtr = TH_MKL_(data)(gradOutput);
   real * resConv[dnnResourceNumber]= {0};
   resConv[dnnResourceDiffSrc] = inPtr;
   resConv[dnnResourceFilter] = filterPtr;
@@ -617,7 +617,7 @@ void MKLNN_(SpatialConvolution_bwdData)(
     gettimeofday(&convert2,NULL);
 
     if(cv_bwddata_input) {
-      TH_MKL_(setMKLdata)(buffer_bwddata_input);
+      //TH_MKL_(setMKLdata)(buffer_bwddata_input);
     }
     gradInput->mkldnnLayout = (long long)primitives->storage->data[CONV_LAYOUT_BWDDATA_INPUT];
   }
@@ -704,9 +704,9 @@ void MKLNN_(SpatialConvolution_bwdFilter)(
   fprintf(stderr, "	weight->size[0]=%d,weight->size[1]=%d\n", gradWeight->size[0],gradWeight->size[1]);
 #endif
 
-  real * inPtr = THTensor_(data)(input);
+  real * inPtr = TH_MKL_(data)(input);
   real * filterPtr = THTensor_(data)(gradWeight);
-  real * outPtr = THTensor_(data)(gradOutput);
+  real * outPtr = TH_MKL_(data)(gradOutput);
   real * biasPtr = THTensor_(data)(gradBias);
 
   real * resConv[dnnResourceNumber]= {0};
