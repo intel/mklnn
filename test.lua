@@ -28,7 +28,7 @@ local function equal(t1, t2, msg)
    end
 end
 
-function mklnntest.SpatialConvolutionMKLDNN_g1()
+function mklnntest.SpatialConvolution_g1()
    -- batch
    local from = math.random(1,5)
    local to = math.random(1,5)
@@ -56,44 +56,10 @@ function mklnntest.SpatialConvolutionMKLDNN_g1()
    dnnModule.bias:copy(oriModule.bias)
    local oriOutput = oriModule:forward(input)
    local dnnOutput = dnnModule:forward(input_clone)
-   --local dnnprimitives = torch.LongTensor(3)
-   --dnnOutput.THNN.MKLDNN_ConvertLayoutBackToNCHW(dnnOutput:cdata(), dnnprimitives:cdata(),0,0)
-   dnnOutput = dnnOutput:th()
-   mytester:assertTensorEq(oriOutput, dnnOutput, 0.00001, 'SpatialConvolutionMKLNN g1 output')
-   if (PRINT_EN == 1) then 
-      print("SpatialConvolution g1 MKLNN >>>>>>>>")
-      local flatInput = torch.Tensor(input:nElement()):copy(input)
-      local flatOriOutput = torch.Tensor(oriOutput:nElement()):copy(oriOutput)
-      local flatDnnOutput = torch.Tensor(dnnOutput:nElement()):copy(dnnOutput)
-      local diff = flatDnnOutput-flatOriOutput
-      print('SpatialConvolution input')
-      print(flatInput)
-      print('SpatialConvolution oriOutput') 
-      print(flatOriOutput)
-      print('SpatialConvolution mklnnOutput')
-      print(flatDnnOutput)
-      print('SpatialConvolution diff')
-      print(diff)    
-   end  
+   mytester:assertTensorEq(oriOutput, dnnOutput:th(), 0.00001, 'mklnn.SpatialConvolution g1 output')
    local oriGradInput = oriModule:backward(input, gradOutput)
    local dnnGradInput = dnnModule:backward(input_clone, gradOutput_clone)
-   dnnGradInput = dnnGradInput:th()
-   mytester:assertTensorEq(oriGradInput, dnnGradInput, 0.00001, 'SpatialConvolution g1 gradInput')
-   if (PRINT_EN == 1) then 
-      print("SpatialConvolution g1 MKLNN <<<<<<<<")
-      local flatGradOutput = torch.Tensor(gradOutput:nElement()):copy(gradOutput)
-      local flatOriGradInput = torch.Tensor(oriGradInput:nElement()):copy(oriGradInput)
-      local flatDnnGradInput = torch.Tensor(dnnGradInput:nElement()):copy(dnnGradInput)
-      local diff = flatDnnGradInput-flatOriGradInput
-      print('SpatialConvolution gradOutput')
-      print(flatGradOutput)
-      print('SpatialConvolution oriGradInput')
-      print(flatOriGradInput)
-      print('SpatialConvolution dnnGradInput')
-      print(flatDnnGradInput)
-      print('SpatialConvolution diff')
-      print( diff)   
-   end 
+   mytester:assertTensorEq(oriGradInput, dnnGradInput:th(), 0.00001, 'mklnn.SpatialConvolution g1 gradInput')
 end
 
 
@@ -110,43 +76,10 @@ function mklnntest.ReLU()
    local dnnModule = mklnn.ReLU():float()
    local oriOutput = oriModule:forward(input)
    local dnnOutput = dnnModule:forward(input_clone)
-   dnnOutput = dnnOutput:th()
-   mytester:assertTensorEq(oriOutput, dnnOutput, 0.00001, 'ReLUMKLDNN output')
-   if (PRINT_EN == 1) then 
-     print("ReLU MKLDNN >>>>>>>>")
-     local flatInput = torch.Tensor(input:nElement()):copy(input)
-     local flatOriOutput = torch.Tensor(oriOutput:nElement()):copy(oriOutput)
-     local flatDnnOutput = torch.Tensor(dnnOutput:nElement()):copy(dnnOutput)
-     local diff = flatDnnOutput-flatOriOutput
-     print('ReLU input')
-     print(flatInput)
-     print('ReLU oriOutput') 
-     print(flatOriOutput)
-     print('ReLU dnnOutput')
-     print(flatDnnOutput)
-     print('ReLU diff')
-     print(diff)    
-   end
---[[
+   mytester:assertTensorEq(oriOutput, dnnOutput:th(), 0.00001, 'mklnn.ReLU output')
    local oriGradInput = oriModule:backward(input, gradOutput)
    local dnnGradInput = dnnModule:backward(input_clone, gradOutput_clone)
-   mytester:assertTensorEq(oriGradInput, dnnGradInput, 0.00001, 'ReLUMKLDNN gradInput')
-   if (PRINT_EN == 1) then 
-      print("ReLU MKLDNN <<<<<<<<")
-      local flatGradOutput = torch.Tensor(gradOutput:nElement()):copy(gradOutput)
-      local flatOriGradInput = torch.Tensor(oriGradInput:nElement()):copy(oriGradInput)
-      local flatDnnGradInput = torch.Tensor(dnnGradInput:nElement()):copy(dnnGradInput)
-      local diff = flatDnnGradInput-flatOriGradInput
-      print('ReLU gradOutput')
-      print(flatGradOutput)
-      print('ReLU oriGradInput')
-      print(flatOriGradInput)
-      print('ReLU dnnGradInput')
-      print(flatDnnGradInput)
-      print('ReLU diff')
-      print( diff)  
-   end 
-]]-- 
+   mytester:assertTensorEq(oriGradInput, dnnGradInput:th(), 0.00001, 'mklnn.ReLU gradInput')
 end
 --[[ 
 function mklnntest.SpatialConvolutionMKLDNN_g2()

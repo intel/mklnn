@@ -1,18 +1,6 @@
-//#ifndef RELU_FILE
-//#define RELU_FILE "src/ThresholdMKLDNN.c"
 #ifndef TH_GENERIC_FILE
 #define TH_GENERIC_FILE "src/ThresholdMKLDNN.c"
 #else
-
-
-//#include "TH.h"
-//#include "MKLDNN.h"
-#include <stdbool.h>
-
-#define real float
-#define Real Float
-
-
 
 static void MKLNN_(SpatialConvolution_Relu_init_forward)(
   THLongTensor *primitives,
@@ -239,7 +227,7 @@ void MKLNN_(Threshold_updateGradInput)(
     //THNN_(SpatialConvolutionMM_MKLDNN_Relu_init_backward)(primitives,N,inC,inH,inW,outC,outH,outW,threshold);
     MKLNN_(SpatialConvolution_Relu_init_backward)(primitives,N,inC,inH,inW,outC,outH,outW,threshold);
   }
-  THTensor_(resizeAs)(gradInput, input);
+  TH_MKL_(resizeAs)(gradInput, input);
   relu1 = (dnnPrimitive_t) (primitives->storage->data[RELU_BACKWARD]);
   real * buffer_backward_input = (real *) (primitives->storage->data[BUFFER_RELU_BACKWARD_INPUT]);
   /*
@@ -254,9 +242,9 @@ void MKLNN_(Threshold_updateGradInput)(
   */
 
   real *resRelu1[dnnResourceNumber];
-  resRelu1[dnnResourceSrc] 	= THTensor_(data)(input);
-  resRelu1[dnnResourceDiffSrc] 	= THTensor_(data)(gradInput);
-  resRelu1[dnnResourceDiffDst] 	= THTensor_(data)(gradOutput);
+  resRelu1[dnnResourceSrc] 	= TH_MKL_(data)(input);
+  resRelu1[dnnResourceDiffSrc] 	= TH_MKL_(data)(gradInput);
+  resRelu1[dnnResourceDiffDst] 	= TH_MKL_(data)(gradOutput);
   cv_backward_output = (dnnPrimitive_t)primitives->storage->data[CV_RELU_BACKWARD_OUTPUT];
   buffer_backward_output = (real *)primitives->storage->data[BUFFER_RELU_BACKWARD_OUTPUT];
   if(cv_backward_output) {
@@ -264,7 +252,7 @@ void MKLNN_(Threshold_updateGradInput)(
     fprintf(stderr, "	RELU backward output conversion \n");
 #endif
     resRelu1[dnnResourceDiffDst] = buffer_backward_output;
-    CHECK_ERR( dnnConversionExecute_F32(cv_backward_output, THTensor_(data)(gradOutput), resRelu1[dnnResourceDiffDst]), err );
+    CHECK_ERR( dnnConversionExecute_F32(cv_backward_output, TH_MKL_(data)(gradOutput), resRelu1[dnnResourceDiffDst]), err );
   }
   CHECK_ERR( dnnExecute_F32(relu1, (void**)resRelu1), err );
   /*	if(cv_backward_output)

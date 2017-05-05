@@ -19,13 +19,14 @@ function Threshold:__init(th,v,ip)
 end
 
 function Threshold:updateOutput(input)
-   --self:updateForLoadSnapshot()
+   if self.dnnPrimitives then
+      self.mkldnnInitOk = 1
+   else
+      self.mkldnnInitOk = 0
+   end
    self.dnnPrimitives = self.dnnPrimitives or torch.LongTensor(11)
-   self.mkldnnInitOk = 0
-   self.output = self.output:mkl()--add
+   self.output = self.output:mkl()
    self:validateParameters()
-   print("input type = ", input:type())
-   print("output type = ", self.output:type())
    wrapper(getType(input),'Threshold_updateOutput',
            input:cdata(),
            self.output:cdata(),
@@ -40,6 +41,7 @@ end
 
 function Threshold:updateGradInput(input, gradOutput)
    self:validateParameters()
+   self.gradInput = self.gradInput:mkl()
    wrapper(getType(input),'Threshold_updateGradInput',
               input:cdata(),
               gradOutput:cdata(),
