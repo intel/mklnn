@@ -233,7 +233,6 @@ void MKLNN_RealCrossChannelLRN_backward(
 
 
 local Real2real = {
-   Long='long',
    Float='float',
    Double='double'
 }
