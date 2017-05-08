@@ -135,22 +135,22 @@ static void MKLNN_(SpatialConvolution_init_forward)(
 
   //save the dnnPrimitive to THTensor(long int array)
   //save the output layout to dnnPrimitive
-  primitives->storage->data[CONV_LAYOUT_FORWARD_OUTPUT] = (long long)lt_forward_conv_output;
-  primitives->storage->data[CONV_LAYOUT_INPUT]          = (long long)lt_forward_conv_input;
-  primitives->storage->data[FORWARD_INDEX]              = (long long)m_conv_forward;
-  primitives->storage->data[BWD_DATA_INDEX]             = (long long)m_conv_bwd_data;
-  primitives->storage->data[BWD_FILTER_INDEX]           = (long long)m_conv_bwd_filter;
-  primitives->storage->data[BWD_BIAS_INDEX]             = (long long)m_conv_bwd_bias;
+  primitives->storage->data[CONV_LAYOUT_FORWARD_OUTPUT] = (long)lt_forward_conv_output;
+  primitives->storage->data[CONV_LAYOUT_INPUT]          = (long)lt_forward_conv_input;
+  primitives->storage->data[FORWARD_INDEX]              = (long)m_conv_forward;
+  primitives->storage->data[BWD_DATA_INDEX]             = (long)m_conv_bwd_data;
+  primitives->storage->data[BWD_FILTER_INDEX]           = (long)m_conv_bwd_filter;
+  primitives->storage->data[BWD_BIAS_INDEX]             = (long)m_conv_bwd_bias;
 
-  primitives->storage->data[CONVERT_FORWARD_INPUT]      = (long long)cv_forward_input;
-  primitives->storage->data[CONVERT_FORWARD_FILTER]     = (long long)cv_forward_filter;
-  primitives->storage->data[CONVERT_FORWARD_BIAS]       = (long long)cv_forward_bias;
-  primitives->storage->data[CONVERT_FORWARD_OUTPUT]     = (long long)cv_forward_output;
+  primitives->storage->data[CONVERT_FORWARD_INPUT]      = (long)cv_forward_input;
+  primitives->storage->data[CONVERT_FORWARD_FILTER]     = (long)cv_forward_filter;
+  primitives->storage->data[CONVERT_FORWARD_BIAS]       = (long)cv_forward_bias;
+  primitives->storage->data[CONVERT_FORWARD_OUTPUT]     = (long)cv_forward_output;
 
-  primitives->storage->data[BUFFER_FORWARD_INPUT]       = (long long)buffer_forward_input;
-  primitives->storage->data[BUFFER_FORWARD_FILTER]      = (long long)buffer_forward_filter;
-  primitives->storage->data[BUFFER_FORWARD_BIAS]        = (long long)buffer_forward_bias;
-  primitives->storage->data[BUFFER_FORWARD_OUTPUT]      = (long long)buffer_forward_output;
+  primitives->storage->data[BUFFER_FORWARD_INPUT]       = (long)buffer_forward_input;
+  primitives->storage->data[BUFFER_FORWARD_FILTER]      = (long)buffer_forward_filter;
+  primitives->storage->data[BUFFER_FORWARD_BIAS]        = (long)buffer_forward_bias;
+  primitives->storage->data[BUFFER_FORWARD_OUTPUT]      = (long)buffer_forward_output;
 
 
 
@@ -270,13 +270,13 @@ static void MKLNN_(SpatialConvolution_init_bwddata)(
 
   //save the dnnPrimitive to THTensor(long int array)
   //save the output layout to dnnPrimitive
-  primitives->storage->data[CONV_LAYOUT_BWDDATA_INPUT]  = (long long)lt_bwddata_conv_input;
-  primitives->storage->data[CONVERT_BWDDATA_INPUT]      = (long long)cv_bwddata_input;
-  primitives->storage->data[CONVERT_BWDDATA_FILTER]     = (long long)cv_bwddata_filter;
-  primitives->storage->data[CONVERT_BWDDATA_OUTPUT]     = (long long)cv_bwddata_output;
-  primitives->storage->data[BUFFER_BWDDATA_INPUT]       = (long long)buffer_bwddata_input;
-  primitives->storage->data[BUFFER_BWDDATA_FILTER]      = (long long)buffer_bwddata_filter;
-  primitives->storage->data[BUFFER_BWDDATA_OUTPUT]      = (long long)buffer_bwddata_output;
+  primitives->storage->data[CONV_LAYOUT_BWDDATA_INPUT]  = (long)lt_bwddata_conv_input;
+  primitives->storage->data[CONVERT_BWDDATA_INPUT]      = (long)cv_bwddata_input;
+  primitives->storage->data[CONVERT_BWDDATA_FILTER]     = (long)cv_bwddata_filter;
+  primitives->storage->data[CONVERT_BWDDATA_OUTPUT]     = (long)cv_bwddata_output;
+  primitives->storage->data[BUFFER_BWDDATA_INPUT]       = (long)buffer_bwddata_input;
+  primitives->storage->data[BUFFER_BWDDATA_FILTER]      = (long)buffer_bwddata_filter;
+  primitives->storage->data[BUFFER_BWDDATA_OUTPUT]      = (long)buffer_bwddata_output;
 #if LOG_ENABLE
   fprintf(stderr, "SpatialConvolutionMM_MKLDNN_init_bwddata: end, sizeof(real)=%d\n",sizeof(real));
 #endif
@@ -378,13 +378,13 @@ static void MKLNN_(SpatialConvolution_init_bwdfilter)(
 
   //save the dnnPrimitive to THTensor(long int array)
   //save the output layout to dnnPrimitive
-  primitives->storage->data[CONV_LAYOUT_BWDFILT_OUTPUT] = (long long)lt_bwdfilter_conv_filter;
-  primitives->storage->data[CONVERT_BWDFILTER_INPUT]    = (long long)cv_bwdfilter_input;
-  primitives->storage->data[CONVERT_BWDFILTER_FILTER]   = (long long)cv_bwdfilter_filter;
-  primitives->storage->data[CONVERT_BWDFILTER_OUTPUT]   = (long long)cv_bwdfilter_output;
-  primitives->storage->data[BUFFER_BWDFILTER_INPUT]     = (long long)buffer_bwdfilter_input;
-  primitives->storage->data[BUFFER_BWDFILTER_FILTER]    = (long long)buffer_bwdfilter_filter;
-  primitives->storage->data[BUFFER_BWDFILTER_OUTPUT]    = (long long)buffer_bwdfilter_output;
+  primitives->storage->data[CONV_LAYOUT_BWDFILT_OUTPUT] = (long)lt_bwdfilter_conv_filter;
+  primitives->storage->data[CONVERT_BWDFILTER_INPUT]    = (long)cv_bwdfilter_input;
+  primitives->storage->data[CONVERT_BWDFILTER_FILTER]   = (long)cv_bwdfilter_filter;
+  primitives->storage->data[CONVERT_BWDFILTER_OUTPUT]   = (long)cv_bwdfilter_output;
+  primitives->storage->data[BUFFER_BWDFILTER_INPUT]     = (long)buffer_bwdfilter_input;
+  primitives->storage->data[BUFFER_BWDFILTER_FILTER]    = (long)buffer_bwdfilter_filter;
+  primitives->storage->data[BUFFER_BWDFILTER_OUTPUT]    = (long)buffer_bwdfilter_output;
 #if LOG_ENABLE
   fprintf(stderr, "SpatialConvolutionMM_MKLDNN_init_bwdfilter: end, sizeof(real)=%d\n",sizeof(real));
 #endif
@@ -429,7 +429,7 @@ void MKLNN_(SpatialConvolution_forward)(
   real *buffer_forward_bias=NULL;
   real * buffer_forward_output =NULL;
   if(initOk == 0) {
-    primitives->storage->data[CONV_LAYOUT_INPUT] = (long long)input->mkldnnLayout;
+    primitives->storage->data[CONV_LAYOUT_INPUT] = (long)input->mkldnnLayout;
     MKLNN_(SpatialConvolution_init_forward)(primitives,N,inC,inH,inW,kH,kW,dH,dW,padH,padW,outC,outH,outW,group);
   }
   m_conv_forward 		= (dnnPrimitive_t)(primitives->storage->data[FORWARD_INDEX]);
@@ -452,7 +452,7 @@ void MKLNN_(SpatialConvolution_forward)(
   fprintf(stderr, "	bias->nDimension=%d,bias->size[0]=%d,bias->storage->data[0]=%.3f\n", bias->nDimension,bias->size[0],bias->storage->data[0]);
   fprintf(stderr, " cv_forward_input=0x%x,cv_forward_filter=0x%x,cv_forward_bias=0x%x,cv_forward_output=0x%x",cv_forward_input,cv_forward_filter,cv_forward_bias,cv_forward_output);
 #endif
-  long long i = 0;
+  long i = 0;
   real * inPtr = TH_MKL_(data)(input);
   real * filterPtr = THTensor_(data)(weight);
   real * outPtr = TH_MKL_(data)(output);
@@ -505,7 +505,7 @@ void MKLNN_(SpatialConvolution_forward)(
     gettimeofday(&convert1,NULL);
     CHECK_ERR(dnnExecute_F32(m_conv_forward, (void**)resConv),err);
     gettimeofday(&convert2,NULL);
-    output->mkldnnLayout = (long long)primitives->storage->data[CONV_LAYOUT_FORWARD_OUTPUT];
+    output->mkldnnLayout = (long)primitives->storage->data[CONV_LAYOUT_FORWARD_OUTPUT];
   }
   else if(sizeof(real) == sizeof(double)) {
     CHECK_ERR(dnnExecute_F64(m_conv_forward, (void**)resConv),err);
@@ -564,7 +564,7 @@ void MKLNN_(SpatialConvolution_bwdData)(
   int outH = gradOutput->size[2];
   int outW = gradOutput->size[3];
   if(initOk == 0) {
-    primitives->storage->data[CONV_LAYOUT_OUTPUT] = (long long)gradOutput->mkldnnLayout;
+    primitives->storage->data[CONV_LAYOUT_OUTPUT] = (long)gradOutput->mkldnnLayout;
     MKLNN_(SpatialConvolution_init_bwddata)(primitives,N,inC,inH,inW,kH,kW,dH,dW,padH,padW,outC,outH,outW,group);
   }
   gettimeofday(&mid1,NULL);
@@ -619,7 +619,7 @@ void MKLNN_(SpatialConvolution_bwdData)(
     if(cv_bwddata_input) {
       //TH_MKL_(setMKLdata)(buffer_bwddata_input);
     }
-    gradInput->mkldnnLayout = (long long)primitives->storage->data[CONV_LAYOUT_BWDDATA_INPUT];
+    gradInput->mkldnnLayout = (long)primitives->storage->data[CONV_LAYOUT_BWDDATA_INPUT];
   }
   else if(sizeof(real) == sizeof(double)) {
     CHECK_ERR(dnnExecute_F64(m_conv_bwdData, (void**)resConv),err);
@@ -682,8 +682,8 @@ void MKLNN_(SpatialConvolution_bwdFilter)(
   int outH = gradOutput->size[2];
   int outW = gradOutput->size[3];
   if(initOk == 0) {
-    primitives->storage->data[CONV_LAYOUT_INPUT] = (long long)input->mkldnnLayout;
-    primitives->storage->data[CONV_LAYOUT_OUTPUT] = (long long)gradOutput->mkldnnLayout;
+    primitives->storage->data[CONV_LAYOUT_INPUT] = (long)input->mkldnnLayout;
+    primitives->storage->data[CONV_LAYOUT_OUTPUT] = (long)gradOutput->mkldnnLayout;
     MKLNN_(SpatialConvolution_init_bwdfilter)(primitives,N,inC,inH,inW,kH,kW,dH,dW,padH,padW,outC,outH,outW,group);
   }
 
