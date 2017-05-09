@@ -24,7 +24,7 @@ function LRN:updateOutput(input)
    end 
    self.dnnPrimitives = self.dnnPrimitives or torch.LongTensor(30)
    self.output = self.output:mkl()
-   self.output:resizeAs(input)
+   --self.output:resizeAs(input)
 	  wrapper(getType(input),'CrossChannelLRN_updateOutput',
 	      input:cdata(),
 	      self.output:cdata(),

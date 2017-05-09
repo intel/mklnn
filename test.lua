@@ -335,7 +335,6 @@ function mklnntest.SpatialBatchNormalization()
       ]]--
    end
 end
---[[
 function mklnntest.SpatialCrossMapLRN()
    local inputSize = math.random(6,9)
    local size = math.random(1,3)*2+1
@@ -350,9 +349,9 @@ function mklnntest.SpatialCrossMapLRN()
    local batchSize = math.random(1,5)
    local from = math.random(3,8)
    local input = torch.rand(batchSize,from, inputSize, inputSize):float()
-   local input_clone = input:clone():float()
+   local input_clone = input:clone():float():mkl()
    local oriOutput = oriModule:forward(input)
-   local dnnOutput = dnnModule:forward(input_clone)
+   local dnnOutput = dnnModule:forward(input_clone):th()
    
    mytester:assertTensorEq(oriOutput, dnnOutput, 0.00001, 'SpatialCrossMapLRNMKLDNN output')
    
@@ -370,7 +369,8 @@ function mklnntest.SpatialCrossMapLRN()
       print(flatDnnOutput)
       print('SpatialCrossMapLRN diff')
       print(diff)    
-   end 
+   end
+   --[[ 
    local gradOutput = oriOutput:clone():uniform(0,1)  --use original OP to aquire the size of output 
    local gradOutput_clone = gradOutput:clone()
    local oriGradInput = oriModule:backward(input, gradOutput)
@@ -390,10 +390,9 @@ function mklnntest.SpatialCrossMapLRN()
       print(flatDnnGradInput)
       print('SpatialCrossMapLRN diff')
       print( diff)   
-   end  
+   end]]--  
 end
 
-]]--
 
 mytester:add(mklnntest)
 jac = nn.Jacobian

@@ -208,8 +208,8 @@ static void MKLNN_RealCrossChannelLRN_init_backward(
   float k);
 
 void MKLNN_RealCrossChannelLRN_updateOutput(
-  THRealTensor *input, 
-  THRealTensor *output,
+  THMKLRealTensor *input, 
+  THMKLRealTensor *output,
   int size, 
   float alpha, 
   float beta, 
@@ -218,9 +218,9 @@ void MKLNN_RealCrossChannelLRN_updateOutput(
   int initOk);
 
 void MKLNN_RealCrossChannelLRN_backward(
-  THRealTensor *input, 
-  THRealTensor *gradOutput, 
-  THRealTensor *gradInput,
+  THMKLRealTensor *input, 
+  THMKLRealTensor *gradOutput, 
+  THMKLRealTensor *gradInput,
   int size, 
   float alpha, 
   float beta, 

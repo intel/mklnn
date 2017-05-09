@@ -115,9 +115,14 @@ static void MKLNN_(CrossChannelLRN_init_backward)(
 
 void MKLNN_(CrossChannelLRN_updateOutput)(
   //THNNState *state,
-  THTensor *input, THTensor *output,
-  int size, float alpha, float beta, float k,
-  THLongTensor *primitives,int initOk)
+  THMKLTensor *input, 
+  THMKLTensor *output,
+  int size, 
+  float alpha, 
+  float beta, 
+  float k,
+  THLongTensor *primitives,
+  int initOk)
 {
 #if LOG_ENABLE
   fprintf(stderr, "BatchNormalization_MKLDNN_updateOutput start.\n");
@@ -129,7 +134,7 @@ void MKLNN_(CrossChannelLRN_updateOutput)(
   int inC = input->size[1];
   int inH = input->size[2];
   int inW = input->size[3];
-
+  TH_MKL_(resizeAs)(output,input);
 
   if(initOk == 0) {
     primitives->storage->data[LRN_LAYOUT_INPUT] = (long long)input->mkldnnLayout;
@@ -140,8 +145,8 @@ void MKLNN_(CrossChannelLRN_updateOutput)(
 
 
   void* LRN_res[dnnResourceNumber];
-  LRN_res[dnnResourceSrc] = THTensor_(data)(input);
-  LRN_res[dnnResourceDst] = THTensor_(data)(output);
+  LRN_res[dnnResourceSrc] = TH_MKL_(data)(input);
+  LRN_res[dnnResourceDst] = TH_MKL_(data)(output);
   LRN_res[dnnResourceWorkspace] = buffer_workspace;
 
   CHECK_ERR( dnnExecute_F32(lrn_forward, (void*)LRN_res), err );
@@ -161,9 +166,15 @@ void MKLNN_(CrossChannelLRN_updateOutput)(
 
 void MKLNN_(CrossChannelLRN_backward)(
   //THNNState *state,
-  THTensor *input, THTensor *gradOutput, THTensor *gradInput,
-  int size, float alpha, float beta, float k,
-  THLongTensor *primitives,int initOk)
+  THMKLTensor *input, 
+  THMKLTensor *gradOutput, 
+  THMKLTensor *gradInput,
+  int size, 
+  float alpha, 
+  float beta, 
+  float k,
+  THLongTensor *primitives,
+  int initOk)
 {
 #if LOG_ENABLE
   fprintf(stderr, "CrossChannelLRN_MKLDNN_backward start.\n");
