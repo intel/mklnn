@@ -165,17 +165,18 @@ local function backward(self, input, gradOutput, scale, gradInput, gradWeight, g
    assert(self.save_mean and self.save_std, 'must call :updateOutput() first')
 
    input, gradOutput = makeContiguous(self, input, gradOutput)
-
+   self.gradInput = self.gradInput:mkl()
    scale = scale or 1
-   if gradInput then
-      gradInput:resizeAs(gradOutput)
-   end
+   --if gradInput then
+   --   gradInput:resizeAs(gradOutput)
+   --end
    
-   if gradInput then
+   --if gradInput then
       wrapper(getType(input),'BatchNormalization_backward',
          input:cdata(),
          gradOutput:cdata(),
-         THNN.optionalTensor(gradInput),
+         --THNN.optionalTensor(gradInput),
+         gradInput,
          THNN.optionalTensor(gradWeight),
          THNN.optionalTensor(gradBias),
          THNN.optionalTensor(self.weight),
@@ -187,6 +188,7 @@ local function backward(self, input, gradOutput, scale, gradInput, gradWeight, g
          scale,
          self.eps,
          self.dnnPrimitives:cdata(),self.mkldnnInitOk)
+   --[[
    else
       input.THNN.BatchNormalization_backward(
          input:cdata(),
@@ -203,7 +205,7 @@ local function backward(self, input, gradOutput, scale, gradInput, gradWeight, g
          scale,
          self.eps)
    end
-
+   ]]--
    return self.gradInput
 end
 

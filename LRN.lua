@@ -40,13 +40,14 @@ end
 
 function LRN:updateGradInput(input, gradOutput)
    if not self.gradInput then return end
-   self.gradInput:resizeAs(input)
-   assert(gradOutput:dim() == 3 or gradOutput:dim() == 4);
-   if not gradOutput:isContiguous() then
-      self._gradOutput = self._gradOutput or gradOutput.new()
-      self._gradOutput:resizeAs(gradOutput):copy(gradOutput)
-      gradOutput = self._gradOutput
-   end
+   self.gradInput = self.gradInput:mkl()
+   --self.gradInput:resizeAs(input)
+   --assert(gradOutput:dim() == 3 or gradOutput:dim() == 4);
+   --if not gradOutput:isContiguous() then
+   --   self._gradOutput = self._gradOutput or gradOutput.new()
+   --   self._gradOutput:resizeAs(gradOutput):copy(gradOutput)
+   --   gradOutput = self._gradOutput
+   --end
    wrapper(getType(input),'CrossChannelLRN_backward',
       input:cdata(),
       gradOutput:cdata(),

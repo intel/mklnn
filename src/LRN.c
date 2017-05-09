@@ -184,7 +184,7 @@ void MKLNN_(CrossChannelLRN_backward)(
   dnnError_t err;
   dnnPrimitive_t bn_backward 		= (dnnPrimitive_t)primitives->storage->data[BN_BACKWARD];
   real * buffer_workspace 	= (real * )primitives->storage->data[BUFFER_LRN_WORKSPACE];
-
+  TH_MKL_(resizeAs)(gradInput,input);
   if(initOk == 0) {
     int N = gradOutput->size[0];
     int outC = gradOutput->size[1];
@@ -193,16 +193,17 @@ void MKLNN_(CrossChannelLRN_backward)(
     primitives->storage->data[LRN_LAYOUT_OUTPUT] = (long long)gradOutput->mkldnnLayout;
     MKLNN_(CrossChannelLRN_init_backward)(primitives,N,outC,outH,outW,size,alpha,beta,k);
   }
-
-
   dnnPrimitive_t cv_backward_output = (dnnPrimitive_t) (primitives->storage->data[CV_LRN_BACKWARD_OUTPUT]);
   real * buffer_backward_output = (real *) (primitives->storage->data[BUFFER_LRN_BACKWARD_OUTPUT]);
-
   void* LRN_res[dnnResourceNumber];
-  LRN_res[dnnResourceSrc] = THTensor_(data)(input);
-  LRN_res[dnnResourceDiffDst] = THTensor_(data)(gradOutput);
-  LRN_res[dnnResourceDiffSrc] = THTensor_(data)(gradInput);
+  LRN_res[dnnResourceSrc] = TH_MKL_(data)(input);
+
+  LRN_res[dnnResourceDiffDst] = TH_MKL_(data)(gradOutput);
+
+  LRN_res[dnnResourceDiffSrc] = TH_MKL_(data)(gradInput);
+
   LRN_res[dnnResourceWorkspace] = buffer_workspace;
+
 
   if(cv_backward_output) {
 #if CONVERSION_LOG

@@ -218,19 +218,19 @@ void MKLNN_(BatchNormalization_backward)(
   THTensor *weight,
   THTensor *running_mean,
   THTensor *running_var,
-  THTensor *save_mean,
-  THTensor *save_std,
+  THMKLTensor *save_mean,
+  THMKLTensor *save_std,
   bool train,
   double scale,
   double eps,
   THLongTensor *primitives,
   int initOk)
 {
-  long nInput = THTensor_(size)(input, 1);
-  long f,n = THTensor_(nElement)(input) / nInput;
+  long nInput = THTensor_(size)(input->tensor, 1);
+  long f,n = THTensor_(nElement)(input->tensor) / nInput;
   struct timeval start,mid,end;
   gettimeofday(&start,NULL);
-
+  TH_MKL_(resizeAs)(gradInput,input);
 
   dnnError_t err;
   int inC = input->size[1];
@@ -241,9 +241,9 @@ void MKLNN_(BatchNormalization_backward)(
 
   if(gradInput == 0) {
     void* BatchNormScaleshift_res[dnnResourceNumber];
-    BatchNormScaleshift_res[dnnResourceSrc] = THTensor_(data)(input);
-    BatchNormScaleshift_res[dnnResourceDiffDst] = THTensor_(data)(gradOutput);
-    BatchNormScaleshift_res[dnnResourceDiffSrc] = THTensor_(data)(gradInput);
+    BatchNormScaleshift_res[dnnResourceSrc] = TH_MKL_(data)(input);
+    BatchNormScaleshift_res[dnnResourceDiffDst] = TH_MKL_(data)(gradOutput);
+    BatchNormScaleshift_res[dnnResourceDiffSrc] = TH_MKL_(data)(gradInput);
     BatchNormScaleshift_res[dnnResourceWorkspace] = buffer_forward_workspace;
     BatchNormScaleshift_res[dnnResourceScaleShift] = buffer_forward_scaleshift;
     fprintf(stderr, "bn_bwd_scaleshift exec start \n");
@@ -281,9 +281,9 @@ void MKLNN_(BatchNormalization_backward)(
     gradInput->storageOffset = 0;
      */
     void* BatchNorm_res[dnnResourceNumber];
-    BatchNorm_res[dnnResourceSrc] = THTensor_(data)(input);
-    BatchNorm_res[dnnResourceDiffDst] = THTensor_(data)(gradOutput);
-    BatchNorm_res[dnnResourceDiffSrc] = THTensor_(data)(gradInput);
+    BatchNorm_res[dnnResourceSrc] = TH_MKL_(data)(input);
+    BatchNorm_res[dnnResourceDiffDst] = TH_MKL_(data)(gradOutput);
+    BatchNorm_res[dnnResourceDiffSrc] = TH_MKL_(data)(gradInput);
     BatchNorm_res[dnnResourceWorkspace] = buffer_forward_workspace;
     BatchNorm_res[dnnResourceScaleShift] = buffer_forward_scaleshift;
     if(cv_backward_output) {

@@ -308,12 +308,11 @@ function mklnntest.SpatialBatchNormalization()
                 print('SpatialBatchNormalization diff')
                 print(diff)
       end
-      --[[
       local gradOutput = oriOutput:clone():uniform(0,1)  --use original OP to aquire the size of output
-      local gradOutput_clone = gradOutput:clone()
+      local gradOutput_clone = gradOutput:clone():mkl()
       local oriGradInput = oriModule:backward(input, gradOutput)
-      local dnnGradInput = dnnModule:backward(input_clone, gradOutput_clone)
-      dnnGradInput.THNN.MKLDNN_ConvertLayoutBackToNCHW(dnnGradInput:cdata(), dnnprimitives:cdata(),0,0)
+      local dnnGradInput = dnnModule:backward(input_clone, gradOutput_clone):th()
+      --dnnGradInput.THNN.MKLDNN_ConvertLayoutBackToNCHW(dnnGradInput:cdata(), dnnprimitives:cdata(),0,0)
       mode_string = mode_string .. '  SpatialBatchNormalizationMKLDNN gradInput'
       mytester:assertTensorEq(oriGradInput, dnnGradInput, 0.00001,  mode_string)
 	  if (PRINT_EN == 1) then
@@ -330,10 +329,11 @@ function mklnntest.SpatialBatchNormalization()
 			print(flatDnnGradInput)
 			print('SpatialBatchNormalization diff')
 			print( diff)
-      end
-      ]]--
+           end
    end
 end
+
+
 function mklnntest.SpatialCrossMapLRN()
    local inputSize = math.random(6,9)
    local size = math.random(1,3)*2+1
@@ -369,11 +369,10 @@ function mklnntest.SpatialCrossMapLRN()
       print('SpatialCrossMapLRN diff')
       print(diff)    
    end
-   --[[ 
    local gradOutput = oriOutput:clone():uniform(0,1)  --use original OP to aquire the size of output 
-   local gradOutput_clone = gradOutput:clone()
+   local gradOutput_clone = gradOutput:clone():mkl()
    local oriGradInput = oriModule:backward(input, gradOutput)
-   local dnnGradInput = dnnModule:backward(input_clone, gradOutput_clone)
+   local dnnGradInput = dnnModule:backward(input_clone, gradOutput_clone):th()
    mytester:assertTensorEq(oriGradInput, dnnGradInput, 0.00001, 'SpatialCrossMapLRNMKLDNN gradInput')
    if (PRINT_EN == 1) then 
       print("SpatialCrossMapLRN MKLDNN <<<<<<<<")
@@ -389,7 +388,7 @@ function mklnntest.SpatialCrossMapLRN()
       print(flatDnnGradInput)
       print('SpatialCrossMapLRN diff')
       print( diff)   
-   end]]--  
+   end
 end
 
 
