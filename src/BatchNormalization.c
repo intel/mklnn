@@ -2,7 +2,7 @@
 #define TH_GENERIC_FILE "src/BatchNormalization.c"
 #else
 
-#include "MKLDNN.h"
+//#include "MKLDNN.h"
 
 static void MKLNN_(BatchNormalization_init_forward)(
   THLongTensor *primitives,
@@ -135,22 +135,25 @@ static void MKLNN_(BatchNormalization_init_backward)(
 
 void MKLNN_(BatchNormalization_updateOutput)(
   //THNNState *state,
-  THTensor *input,
-  THTensor *output,
+  THMKLTensor *input,
+  THMKLTensor *output,
   THTensor *weight,
   THTensor *bias,
   THTensor *running_mean,
   THTensor *running_var,
-  THTensor *save_mean,
-  THTensor *save_std,
+  THMKLTensor *save_mean,
+  THMKLTensor *save_std,
   bool train,
   double momentum,
   double eps,
   THLongTensor *primitives,
   int initOk)
-{
-  long nInput = THTensor_(size)(input, 1);
-  long f,n = THTensor_(nElement)(input) / nInput;
+{ 
+  //change
+  //long nInput = THTensor_(size)(input, 1);
+  long nInput = input->size[1];
+  long f,n = THTensor_(nElement)(input->tensor) / nInput;
+  TH_MKL_(resizeAs)(output,input);
   struct timeval start,mid,end;
   gettimeofday(&start,NULL);
   dnnError_t err;
@@ -186,11 +189,14 @@ void MKLNN_(BatchNormalization_updateOutput)(
   }
   gettimeofday(&mid,NULL);
   void* BatchNorm_res[dnnResourceNumber];
-  BatchNorm_res[dnnResourceSrc] = THTensor_(data)(input);
-  BatchNorm_res[dnnResourceDst] = THTensor_(data)(output);
+  BatchNorm_res[dnnResourceSrc] = TH_MKL_(data)(input);
+  BatchNorm_res[dnnResourceDst] = TH_MKL_(data)(output);
   BatchNorm_res[dnnResourceWorkspace] = buffer_forward_workspace;
   BatchNorm_res[dnnResourceScaleShift] = buffer_forward_scaleshift;
-
+  printf(" BatchNorm_res[dnnResourceSrc] = 0x%x \n", BatchNorm_res[dnnResourceSrc]);
+  printf(" BatchNorm_res[dnnResourceDst] = 0x%x \n", BatchNorm_res[dnnResourceDst]);
+  printf(" BatchNorm_res[dnnResourceWorkspace] = 0x%x \n", BatchNorm_res[dnnResourceWorkspace]);
+  printf(" BatchNorm_res[dnnResourceShift] = 0x%x \n", BatchNorm_res[dnnResourceScaleShift]);
   CHECK_ERR( dnnExecute_F32(bn_forward, (void*)BatchNorm_res), err );
   output->mkldnnLayout = (long long)primitives->storage->data[BN_LAYOUT_FORWARD_OUTPUT];
   //output->storageOffset = 0;
@@ -204,9 +210,9 @@ void MKLNN_(BatchNormalization_updateOutput)(
 
 void MKLNN_(BatchNormalization_backward)(
   //THNNState *state,
-  THTensor *input,
-  THTensor *gradOutput,
-  THTensor *gradInput,
+  THMKLTensor *input,
+  THMKLTensor *gradOutput,
+  THMKLTensor *gradInput,
   THTensor *gradWeight,
   THTensor *gradBias,
   THTensor *weight,
@@ -224,6 +230,7 @@ void MKLNN_(BatchNormalization_backward)(
   long f,n = THTensor_(nElement)(input) / nInput;
   struct timeval start,mid,end;
   gettimeofday(&start,NULL);
+
 
   dnnError_t err;
   int inC = input->size[1];

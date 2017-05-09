@@ -58,7 +58,7 @@ function BN:__init(nOutput, eps, momentum, affine)
    self.running_mean = torch.zeros(nOutput)
    self.running_var = torch.ones(nOutput)
 
-   self:setEngine(1)
+   --self:setEngine(1)
 
 
    if self.affine then
@@ -82,15 +82,17 @@ function BN:reset()
 end
 
 function BN:checkInputDim(input)
-   assert(input:dim() == self.nDim, string.format(
+   --[[assert(input:tensor():dim() == self.nDim, string.format(
       'only mini-batch supported (%dD tensor), got %dD tensor instead',
-      self.nDim, input:dim()))
+      self.nDim, input:tensor():dim()))
    assert(input:size(2) == self.running_mean:nElement(), string.format(
       'got %d-feature tensor, expected %d',
       input:size(2), self.running_mean:nElement()))
+   ]]--
 end
 
 local function makeContiguous(self, input, gradOutput)
+   --[[
    if not input:isContiguous() then
       self._input = self._input or input.new()
       self._input:resizeAs(input):copy(input)
@@ -103,40 +105,57 @@ local function makeContiguous(self, input, gradOutput)
          gradOutput = self._gradOutput
       end
    end
+   ]]--
    return input, gradOutput
 end
 
 function BN:updateOutput(input)
    self:checkInputDim(input)
-   if self.initStep == 0 then
-   	self.initStep = 1
+
+   if self.dnnPrimitives then
+      self.mkldnnInitOk = 1
    else
-	self.mkldnnInitOk = 1
+      self.mkldnnInitOk = 0
    end
-   if self.mkldnnInitOk == 0 then
-      self.dnnPrimitives = torch.LongTensor(15)
+   self.dnnPrimitives = self.dnnPrimitives or torch.LongTensor(15)
+
+
+   --input = makeContiguous(self, input)
+   self.output = self.output:mkl()
+   --self.output:resizeAs(input)
+   if self.save_mean then
+      self.save_mean = self.save_mean:mkl()
+   else
+      self.save_mean = input.new()
    end
-
-   input = makeContiguous(self, input)
-
-   self.output:resizeAs(input)
-   self.save_mean = self.save_mean or input.new()
-   self.save_mean:resizeAs(self.running_mean)
-   self.save_std = self.save_std or input.new()
-   self.save_std:resizeAs(self.running_var)
+   if self.save_std then
+      self.save_std = self.save_std:mkl()
+   else
+      self.save_std = input.new()
+   end
+   --self.save_mean = self.save_mean or input.new()
+   --self.save_mean:resizeAs(self.running_mean)
+   --self.save_std = self.save_std or input.new()
+   --self.save_std:resizeAs(self.running_var)
+   --self.weight = self.weight:mkl()
+   --self.bias = self.bias:mkl()
+   --self.running_mean = self.running_mean:mkl()
+   --self.running_var = self.running_var:mkl()
+   --self.save_mean = self.save_mean:mkl()
+   --self.save_std = self.save_std:mkl() 
    wrapper(getType(input),'BatchNormalization_updateOutput',
-   input:cdata(),
-   self.output:cdata(),
-   THNN.optionalTensor(self.weight),
-   THNN.optionalTensor(self.bias),
-   self.running_mean:cdata(),
-   self.running_var:cdata(),
-   self.save_mean:cdata(),
-   self.save_std:cdata(),
-   self.train,
-   self.momentum,
-   self.eps,
-   self.dnnPrimitives:cdata(),self.mkldnnInitOk)
+      input:cdata(),
+      self.output:cdata(),
+      THNN.optionalTensor(self.weight),
+      THNN.optionalTensor(self.bias),
+      self.running_mean:cdata(),
+      self.running_var:cdata(),
+      self.save_mean:cdata(),
+      self.save_std:cdata(),
+      self.train,
+      self.momentum,
+      self.eps,
+      self.dnnPrimitives:cdata(),self.mkldnnInitOk)
    return self.output
 end
 

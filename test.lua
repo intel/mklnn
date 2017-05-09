@@ -221,7 +221,7 @@ function mklnntest.SpatialMaxPooling()
     end
 	  
     local input_clone = input:clone():float():mkl()
-    local gradOutput_clone = gradOutput:clone():float()
+    local gradOutput_clone = gradOutput:clone():float():mkl()
 
     local oriOutput = oriModule:forward(input)
     local dnnOutput = dnnModule:forward(input_clone)
@@ -266,7 +266,7 @@ function mklnntest.SpatialMaxPooling()
 ]]-- 
   end
 end
---[[
+
 function mklnntest.SpatialBatchNormalization()
    local planes = torch.random(1,6)
    local size = { torch.random(2, 6), planes }
@@ -275,7 +275,7 @@ function mklnntest.SpatialBatchNormalization()
       table.insert(size, hw)
    end
    local input = torch.zeros(table.unpack(size)):uniform():float()
-   local input_clone = input:clone():float()
+   local input_clone = input:clone():float():mkl()
 
    for _,affine_mode in pairs({true,false}) do
 
@@ -290,12 +290,10 @@ function mklnntest.SpatialBatchNormalization()
       local oriOutput = oriModule:forward(input)
       local dnnOutput = dnnModule:forward(input_clone)
 
-      local dnnprimitives = torch.LongTensor(3)
-
-      dnnOutput.THNN.MKLDNN_ConvertLayoutBackToNCHW(dnnOutput:cdata(), dnnprimitives:cdata(),0,0)
 
       mode_string = mode_string .. '  SpatialBatchNormalizationMKLDNN output'
-      mytester:assertTensorEq(oriOutput, dnnOutput, 0.00001, mode_string)
+      --dnnOutput = dnnOutput:th()
+      mytester:assertTensorEq(oriOutput, dnnOutput:th(), 0.00001, mode_string)
             if (PRINT_EN == 1) then
                 print("SpatialBatchNormalization MKLDNN >>>>>>>>")
                 local flatInput = torch.Tensor(input:nElement()):copy(input)
@@ -311,6 +309,7 @@ function mklnntest.SpatialBatchNormalization()
                 print('SpatialBatchNormalization diff')
                 print(diff)
       end
+      --[[
       local gradOutput = oriOutput:clone():uniform(0,1)  --use original OP to aquire the size of output
       local gradOutput_clone = gradOutput:clone()
       local oriGradInput = oriModule:backward(input, gradOutput)
@@ -333,9 +332,10 @@ function mklnntest.SpatialBatchNormalization()
 			print('SpatialBatchNormalization diff')
 			print( diff)
       end
+      ]]--
    end
 end
-
+--[[
 function mklnntest.SpatialCrossMapLRN()
    local inputSize = math.random(6,9)
    local size = math.random(1,3)*2+1
