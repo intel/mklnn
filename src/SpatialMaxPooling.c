@@ -382,10 +382,10 @@ void MKLNN_(SpatialMaxPooling_updateGradInput)(
   real *indices_data;
 
   /* get contiguous gradOutput */
-  gradOutput = THTensor_(newContiguous)(gradOutput);
+  gradOutput->tensor = THTensor_(newContiguous)(gradOutput->tensor);
   /* resize */
-  THTensor_(resizeAs)(gradInput, input);
-  THTensor_(zero)(gradInput);
+  TH_MKL_(resizeAs)(gradInput, input);
+  THTensor_(zero)(gradInput->tensor);
   //change
   if (input->tensor->nDimension == 4) {
     nbatch = input->size[0];
@@ -401,9 +401,9 @@ void MKLNN_(SpatialMaxPooling_updateGradInput)(
   owidth = gradOutput->size[dimw];
 
   /* get raw pointers */
-  gradInput_data = THTensor_(data)(gradInput);
-  gradOutput_data = THTensor_(data)(gradOutput);
-  indices_data = THTensor_(data)(indices);
+  gradInput_data = TH_MKL_(data)(gradInput);
+  gradOutput_data = TH_MKL_(data)(gradOutput);
+  indices_data = TH_MKL_(data)(indices);
   //change
   /* backprop */
   if (input->tensor->nDimension == 3) {
@@ -492,7 +492,7 @@ void MKLNN_(SpatialMaxPooling_updateGradInput)(
   }
 
   /* cleanup */
-  THTensor_(free)(gradOutput);
+  TH_MKL_(free)(gradOutput);
 }
 
 #endif

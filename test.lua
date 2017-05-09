@@ -81,7 +81,8 @@ function mklnntest.ReLU()
    local dnnGradInput = dnnModule:backward(input_clone, gradOutput_clone)
    mytester:assertTensorEq(oriGradInput, dnnGradInput:th(), 0.00001, 'mklnn.ReLU gradInput')
 end
---[[ 
+
+--[[
 function mklnntest.SpatialConvolutionMKLDNN_g2()
 
   -- batch
@@ -244,9 +245,8 @@ function mklnntest.SpatialMaxPooling()
       print('SpatialMaxPooling diff')
       print(diff)    
     end 
---[[ 
     local oriGradInput = oriModule:backward(input, gradOutput)
-    local dnnGradInput = dnnModule:backward(input_clone, gradOutput_clone)
+    local dnnGradInput = dnnModule:backward(input_clone, gradOutput_clone):th()
     mytester:assertTensorEq(oriGradInput, dnnGradInput, 0.00001, 'SpatialMaxPoolingMKLDNN gradInput')
     if (PRINT_EN == 1) then 
       print("SpatialMaxPooling MKLDNN <<<<<<<<")
@@ -263,7 +263,6 @@ function mklnntest.SpatialMaxPooling()
       print('SpatialMaxPooling diff')
       print(diff)   
     end 
-]]-- 
   end
 end
 

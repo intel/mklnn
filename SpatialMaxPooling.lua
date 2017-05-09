@@ -73,6 +73,7 @@ function SpatialMaxPooling:updateOutput(input)
 end
 
 function SpatialMaxPooling:updateGradInput(input, gradOutput)
+   self.gradInput = self.gradInput:mkl()
    wrapper(getType(input),'SpatialMaxPooling_updateGradInput',
       input:cdata(),
       gradOutput:cdata(),
