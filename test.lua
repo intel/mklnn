@@ -1,8 +1,6 @@
 -- you can easily test specific uni：ts like this:
 -- th -lnn -e "nn.test{'LookupTable'}"
 -- th -lnn -e "nn.test{'LookupTable', 'Add'}"
---require 'nn'
---require 'mklnn'
 local mytester = torch.Tester()
 local jac
 local sjac
@@ -83,10 +81,8 @@ function mklnntest.ReLU()
    mytester:assertTensorEq(oriGradInput, dnnGradInput:th(), 0.00001, 'mklnn.ReLU gradInput')
 end
 
---[[
-function mklnntest.SpatialConvolutionMKLDNN_g2()
 
-  -- batch
+function mklnntest.SpatialConvolutionMKLDNN_g2()
    local batch = math.random(2,5)
    local group = math.random(2,5)
    local partFrom = math.random(1,3)
@@ -97,29 +93,19 @@ function mklnntest.SpatialConvolutionMKLDNN_g2()
    local kj = ki
    local si = math.random(1,4)
    local sj = si
-   
    local ini = math.random(4,8)
    local inj = ini
 
-
    local input = torch.randn(batch, from, inj, ini):float()
-   
-
    local dnnModule = mklnn.SpatialConvolution(from, to, ki, kj, si, sj, 1, 1, group):float()
    local weights = torch.randn(dnnModule.weight:size())
    local bias = torch.randn(dnnModule.bias:size())
    dnnModule.weight:copy(weights)
    dnnModule.bias:copy(bias)
    
-   local dnnOutput = dnnModule:forward(input)
-
-   local dnnprimitives = torch.LongTensor(2)
-   dnnOutput.THNN.MKLDNN_ConvertLayoutBackToNCHW(dnnOutput:cdata(), dnnprimitives:cdata(),0,0)
-   
+   local dnnOutput = dnnModule:forward(input:mkl()):th()
    local gradOutput = torch.randn(dnnOutput:size()):float()
-   
-   local dnnGradInput = dnnModule:backward(input, gradOutput)
-   dnnOutput.THNN.MKLDNN_ConvertLayoutBackToNCHW(dnnGradInput:cdata(), dnnprimitives:cdata(),0,0)
+   local dnnGradInput = dnnModule:backward(input:mkl(), gradOutput:mkl()):th()
 
    local oriWeightT = {}
    local oriBiasT = {}
@@ -133,62 +119,26 @@ function mklnntest.SpatialConvolutionMKLDNN_g2()
    local oriGradInput = torch.Tensor(dnnGradInput:size()):float()
    
    for i = 1,group,1 do
-        local rsOut = 1+(i-1)*partTo
-        local reOut = i*partTo
-        local rsIn = 1+(i-1)*partFrom
-        local reIn = i*partFrom
-    oriWeightT[i] = weights[{{rsOut,reOut},{}}]:clone()
-    oriBiasT[i] = bias[{{rsOut,reOut}}]:clone()
-    oriInputT[i] = input[{{},{rsIn,reIn},{},{}}]:clone()
-    oriGradOutputT[i] = gradOutput[{{}, {rsOut,reOut}, {}, {}}] 
-    convModuleT[i] = nn.SpatialConvolution(partFrom, partTo, ki, kj, si, sj, 1, 1):float()
-    --print(convModuleT[i])
-    --print(oriInputT[i]:size())
-    --print(oriGradOutputT[i]:size())
-    convModuleT[i].weight:copy(oriWeightT[i])
-    convModuleT[i].bias:copy(oriBiasT[i])
-    oriOutputT[i] = convModuleT[i]:forward(oriInputT[i])
-    --print(oriOutputT[i]:size())
-    oriGradInputT[i] = convModuleT[i]:backward(oriInputT[i], oriGradOutputT[i])
-    oriOutput[{{},{rsOut,reOut},{},{}}] = oriOutputT[i]:clone()
-    oriGradInput[{{},{rsIn,reIn},{},{}}] = oriGradInputT[i]:clone()
-  end
-    
-    mytester:assertTensorEq(oriOutput, dnnOutput, 0.00001, 'SpatialConvolutionMKLNN g2 output')
-   
-   if (PRINT_EN == 1) then 
-      print("SpatialConvolution g2 MKLDNN >>>>>>>>")
-      local flatInput = torch.Tensor(input:nElement()):copy(input)
-      local flatOriOutput = torch.Tensor(oriOutput:nElement()):copy(oriOutput)
-      local flatDnnOutput = torch.Tensor(dnnOutput:nElement()):copy(dnnOutput)
-      local diff = flatDnnOutput-flatOriOutput
-      print('SpatialConvolution input')
-      print(flatInput)
-      print('SpatialConvolution oriOutput') 
-      print(flatOriOutput)
-      print('SpatialConvolution mklnnOutput')
-      print(flatDnnOutput)
-      print('SpatialConvolution diff')
-      print(diff)    
+      local rsOut = 1+(i-1)*partTo
+      local reOut = i*partTo
+      local rsIn = 1+(i-1)*partFrom
+      local reIn = i*partFrom
+      oriWeightT[i] = weights[{{rsOut,reOut},{}}]:clone()
+      oriBiasT[i] = bias[{{rsOut,reOut}}]:clone()
+      oriInputT[i] = input[{{},{rsIn,reIn},{},{}}]:clone()
+      oriGradOutputT[i] = gradOutput[{{}, {rsOut,reOut}, {}, {}}] 
+      convModuleT[i] = nn.SpatialConvolution(partFrom, partTo, ki, kj, si, sj, 1, 1):float()
+      convModuleT[i].weight:copy(oriWeightT[i])
+      convModuleT[i].bias:copy(oriBiasT[i])
+      oriOutputT[i] = convModuleT[i]:forward(oriInputT[i])
+      oriGradInputT[i] = convModuleT[i]:backward(oriInputT[i], oriGradOutputT[i])
+      oriOutput[{{},{rsOut,reOut},{},{}}] = oriOutputT[i]:clone()
+      oriGradInput[{{},{rsIn,reIn},{},{}}] = oriGradInputT[i]:clone()
    end
-   mytester:assertTensorEq(oriGradInput, dnnGradInput, 0.00001, 'SpatialConvolutionMKLDNN g2 gradInput')
-   if (PRINT_EN == 1) then 
-      print("SpatialConvolution g2 MKLDNN <<<<<<<<")
-      local flatGradOutput = torch.Tensor(gradOutput:nElement()):copy(gradOutput)
-      local flatOriGradInput = torch.Tensor(oriGradInput:nElement()):copy(oriGradInput)
-      local flatDnnGradInput = torch.Tensor(dnnGradInput:nElement()):copy(dnnGradInput)
-      local diff = flatDnnGradInput-flatOriGradInput
-      print('SpatialConvolution gradOutput')
-      print(flatGradOutput)
-      print('SpatialConvolution oriGradInput')
-      print(flatOriGradInput)
-      print('SpatialConvolution mklnnGradInput')
-      print(flatDnnGradInput)
-      print('SpatialConvolution diff')
-      print( diff)   
-   end  
+   mytester:assertTensorEq(oriOutput, dnnOutput, 0.00001, 'mklnn.SpatialConvolution g2 output')
+   mytester:assertTensorEq(oriGradInput, dnnGradInput, 0.00001, 'mklnn.SpatialConvolution g2 gradInput')
+
 end
-]]--
 
 function mklnntest.SpatialMaxPooling()
   for _,ceil_mode in pairs({true,false}) do
@@ -222,49 +172,17 @@ function mklnntest.SpatialMaxPooling()
       oriModule:floor() 
       dnnModule:floor()
     end
-	  
     local input_clone = input:clone():float():mkl()
     local gradOutput_clone = gradOutput:clone():float():mkl()
 
     local oriOutput = oriModule:forward(input)
     local dnnOutput = dnnModule:forward(input_clone)
-    print("type output = ",dnnOutput:type())
     dnnOutput = dnnOutput:th()
-    mytester:assertTensorEq(oriOutput, dnnOutput, 0.00001, 'SpatialMaxPoolingMKLDNN output')
+    mytester:assertTensorEq(oriOutput, dnnOutput, 0.00001, 'mklnn.SpatialMaxPooling output')
 
-    if (PRINT_EN == 1) then 
-      print("SpatialMaxPooling MKLDNN >>>>>>>>")
-      local flatInput = torch.Tensor(input:nElement()):copy(input)
-      local flatOriOutput = torch.Tensor(oriOutput:nElement()):copy(oriOutput)
-      local flatDnnOutput = torch.Tensor(dnnOutput:nElement()):copy(dnnOutput)
-      local diff = flatDnnOutput-flatOriOutput
-      print('SpatialMaxPooling input')
-      print(flatInput)
-      print('SpatialMaxPooling oriOutput') 
-      print(flatOriOutput)
-      print('SpatialMaxPooling dnnOutput')
-      print(flatDnnOutput)
-      print('SpatialMaxPooling diff')
-      print(diff)    
-    end 
     local oriGradInput = oriModule:backward(input, gradOutput)
     local dnnGradInput = dnnModule:backward(input_clone, gradOutput_clone):th()
-    mytester:assertTensorEq(oriGradInput, dnnGradInput, 0.00001, 'SpatialMaxPoolingMKLDNN gradInput')
-    if (PRINT_EN == 1) then 
-      print("SpatialMaxPooling MKLDNN <<<<<<<<")
-      local flatGradOutput = torch.Tensor(gradOutput:nElement()):copy(gradOutput)
-      local flatOriGradInput = torch.Tensor(oriGradInput:nElement()):copy(oriGradInput)
-      local flatDnnGradInput = torch.Tensor(dnnGradInput:nElement()):copy(dnnGradInput)
-      local diff = flatDnnGradInput-flatOriGradInput
-      print('SpatialMaxPooling gradOutput')
-      print(flatGradOutput)
-      print('SpatialMaxPooling oriGradInput')
-      print(flatOriGradInput)
-      print('SpatialMaxPooling dnnGradInput')
-      print(flatDnnGradInput)
-      print('SpatialMaxPooling diff')
-      print(diff)   
-    end 
+    mytester:assertTensorEq(oriGradInput, dnnGradInput, 0.00001, 'mklnn.SpatialMaxPooling gradInput')
   end
 end
 
@@ -291,13 +209,13 @@ function mklnntest.SpatialBatchNormalization()
       local oriOutput = oriModule:forward(input)
       local dnnOutput = dnnModule:forward(input_clone)
 
-      mode_string = mode_string .. '  SpatialBatchNormalizationMKLDNN output'
+      mode_string = mode_string .. '  mklnn.SpatialBatchNormalization output'
       mytester:assertTensorEq(oriOutput, dnnOutput:th(), 0.00001, mode_string)
       local gradOutput = oriOutput:clone():uniform(0,1)  --use original OP to aquire the size of output
       local gradOutput_clone = gradOutput:clone():mkl()
       local oriGradInput = oriModule:backward(input, gradOutput)
       local dnnGradInput = dnnModule:backward(input_clone, gradOutput_clone):th()
-      mode_string = mode_string .. '  SpatialBatchNormalizationMKLDNN gradInput'
+      mode_string = mode_string .. '  mklnn.SpatialBatchNormalization gradInput'
       mytester:assertTensorEq(oriGradInput, dnnGradInput, 0.00001,  mode_string)
    end
 end
