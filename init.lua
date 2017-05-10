@@ -37,5 +37,5 @@ require('mklnn.ReLU')
 require('mklnn.SpatialMaxPooling')
 require('mklnn.BatchNormalization')
 require('mklnn.SpatialBatchNormalization')
-require('mklnn.LRN')
+require('mklnn.SpatialCrossMapLRN')
 return mklnn

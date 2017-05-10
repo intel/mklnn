@@ -1,5 +1,5 @@
 #ifndef TH_GENERIC_FILE
-#define TH_GENERIC_FILE "src/LRN.c"
+#define TH_GENERIC_FILE "src/SpatialCrossMapLRN.c"
 #else
 
 

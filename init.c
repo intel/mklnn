@@ -27,7 +27,7 @@
 #include "generateAllTypes.h"
 #include "src/BatchNormalization.c"
 #include "generateAllTypes.h"
-#include "src/LRN.c"
+#include "src/SpatialCrossMapLRN.c"
 #include "generateAllTypes.h"
 
 
