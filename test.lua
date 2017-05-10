@@ -28,6 +28,7 @@ local function equal(t1, t2, msg)
    end
 end
 
+
 function mklnntest.SpatialConvolution_g1()
    -- batch
    local from = math.random(1,5)
@@ -188,6 +189,7 @@ function mklnntest.SpatialConvolutionMKLDNN_g2()
    end  
 end
 ]]--
+
 function mklnntest.SpatialMaxPooling()
   for _,ceil_mode in pairs({true,false}) do
     local from = math.random(1,5)
@@ -266,6 +268,7 @@ function mklnntest.SpatialMaxPooling()
   end
 end
 
+
 function mklnntest.SpatialBatchNormalization()
    local planes = torch.random(1,6)
    local size = { torch.random(2, 6), planes }
@@ -277,7 +280,6 @@ function mklnntest.SpatialBatchNormalization()
    local input_clone = input:clone():float():mkl()
 
    for _,affine_mode in pairs({true,false}) do
-
       local mode_string = affine_mode and 'affine true' or 'affile false'
       local oriModule = nn.SpatialBatchNormalization(planes, 1e-5, 0.1, affine_mode):float()
       local dnnModule = mklnn.SpatialBatchNormalization(planes, 1e-5, 0.1, affine_mode):float()
@@ -289,47 +291,14 @@ function mklnntest.SpatialBatchNormalization()
       local oriOutput = oriModule:forward(input)
       local dnnOutput = dnnModule:forward(input_clone)
 
-
       mode_string = mode_string .. '  SpatialBatchNormalizationMKLDNN output'
-      --dnnOutput = dnnOutput:th()
       mytester:assertTensorEq(oriOutput, dnnOutput:th(), 0.00001, mode_string)
-            if (PRINT_EN == 1) then
-                print("SpatialBatchNormalization MKLDNN >>>>>>>>")
-                local flatInput = torch.Tensor(input:nElement()):copy(input)
-                local flatOriOutput = torch.Tensor(oriOutput:nElement()):copy(oriOutput)
-                local flatDnnOutput = torch.Tensor(dnnOutput:nElement()):copy(dnnOutput)
-                local diff = flatDnnOutput-flatOriOutput
-                print('SpatialBatchNormalization input')
-                print(flatInput)
-                print('SpatialBatchNormalization oriOutput')
-                print(flatOriOutput)
-                print('SpatialBatchNormalization dnnOutput')
-                print(flatDnnOutput)
-                print('SpatialBatchNormalization diff')
-                print(diff)
-      end
       local gradOutput = oriOutput:clone():uniform(0,1)  --use original OP to aquire the size of output
       local gradOutput_clone = gradOutput:clone():mkl()
       local oriGradInput = oriModule:backward(input, gradOutput)
       local dnnGradInput = dnnModule:backward(input_clone, gradOutput_clone):th()
-      --dnnGradInput.THNN.MKLDNN_ConvertLayoutBackToNCHW(dnnGradInput:cdata(), dnnprimitives:cdata(),0,0)
       mode_string = mode_string .. '  SpatialBatchNormalizationMKLDNN gradInput'
       mytester:assertTensorEq(oriGradInput, dnnGradInput, 0.00001,  mode_string)
-	  if (PRINT_EN == 1) then
-			print("SpatialBatchNormalization MKLDNN <<<<<<<<")
-			local flatGradOutput = torch.Tensor(gradOutput:nElement()):copy(gradOutput)
-			local flatOriGradInput = torch.Tensor(oriGradInput:nElement()):copy(oriGradInput)
-			local flatDnnGradInput = torch.Tensor(dnnGradInput:nElement()):copy(dnnGradInput)
-			local diff = flatDnnGradInput-flatOriGradInput
-			print('SpatialBatchNormalization gradOutput')
-			print(flatGradOutput)
-			print('SpatialBatchNormalization oriGradInput')
-			print(flatOriGradInput)
-			print('SpatialBatchNormalization dnnGradInput')
-			print(flatDnnGradInput)
-			print('SpatialBatchNormalization diff')
-			print( diff)
-           end
    end
 end
 
@@ -351,44 +320,12 @@ function mklnntest.SpatialCrossMapLRN()
    local input_clone = input:clone():float():mkl()
    local oriOutput = oriModule:forward(input)
    local dnnOutput = dnnModule:forward(input_clone):th()
-   
-   mytester:assertTensorEq(oriOutput, dnnOutput, 0.00001, 'SpatialCrossMapLRNMKLDNN output')
-   
-   if (PRINT_EN == 1) then 
-      print("SpatialCrossMapLRN MKLDNN >>>>>>>>")
-      local flatInput = torch.Tensor(input:nElement()):copy(input)
-      local flatOriOutput = torch.Tensor(oriOutput:nElement()):copy(oriOutput)
-      local flatDnnOutput = torch.Tensor(dnnOutput:nElement()):copy(dnnOutput)
-      local diff = flatDnnOutput-flatOriOutput
-      print('SpatialCrossMapLRN input')
-      print(flatInput)
-      print('SpatialCrossMapLRN oriOutput') 
-      print(flatOriOutput)
-      print('SpatialCrossMapLRN dnnOutput')
-      print(flatDnnOutput)
-      print('SpatialCrossMapLRN diff')
-      print(diff)    
-   end
+   mytester:assertTensorEq(oriOutput, dnnOutput, 0.00001, 'mklnn.SpatialCrossMapLRN output')
    local gradOutput = oriOutput:clone():uniform(0,1)  --use original OP to aquire the size of output 
    local gradOutput_clone = gradOutput:clone():mkl()
    local oriGradInput = oriModule:backward(input, gradOutput)
    local dnnGradInput = dnnModule:backward(input_clone, gradOutput_clone):th()
-   mytester:assertTensorEq(oriGradInput, dnnGradInput, 0.00001, 'SpatialCrossMapLRNMKLDNN gradInput')
-   if (PRINT_EN == 1) then 
-      print("SpatialCrossMapLRN MKLDNN <<<<<<<<")
-      local flatGradOutput = torch.Tensor(gradOutput:nElement()):copy(gradOutput)
-      local flatOriGradInput = torch.Tensor(oriGradInput:nElement()):copy(oriGradInput)
-      local flatDnnGradInput = torch.Tensor(dnnGradInput:nElement()):copy(dnnGradInput)
-      local diff = flatDnnGradInput-flatOriGradInput
-      print('SpatialCrossMapLRN gradOutput')
-      print(flatGradOutput)
-      print('SpatialCrossMapLRN oriGradInput')
-      print(flatOriGradInput)
-      print('SpatialCrossMapLRN dnnGradInput')
-      print(flatDnnGradInput)
-      print('SpatialCrossMapLRN diff')
-      print( diff)   
-   end
+   mytester:assertTensorEq(oriGradInput, dnnGradInput, 0.00001, 'mklnn.SpatialCrossMapLRN gradInput')
 end
 
 

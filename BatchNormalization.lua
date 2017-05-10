@@ -123,26 +123,6 @@ function BN:updateOutput(input)
    --input = makeContiguous(self, input)
    self.output = self.output:mkl()
    --self.output:resizeAs(input)
-   if self.save_mean then
-      self.save_mean = self.save_mean:mkl()
-   else
-      self.save_mean = input.new()
-   end
-   if self.save_std then
-      self.save_std = self.save_std:mkl()
-   else
-      self.save_std = input.new()
-   end
-   --self.save_mean = self.save_mean or input.new()
-   --self.save_mean:resizeAs(self.running_mean)
-   --self.save_std = self.save_std or input.new()
-   --self.save_std:resizeAs(self.running_var)
-   --self.weight = self.weight:mkl()
-   --self.bias = self.bias:mkl()
-   --self.running_mean = self.running_mean:mkl()
-   --self.running_var = self.running_var:mkl()
-   --self.save_mean = self.save_mean:mkl()
-   --self.save_std = self.save_std:mkl() 
    wrapper(getType(input),'BatchNormalization_updateOutput',
       input:cdata(),
       self.output:cdata(),
@@ -150,8 +130,6 @@ function BN:updateOutput(input)
       THNN.optionalTensor(self.bias),
       self.running_mean:cdata(),
       self.running_var:cdata(),
-      self.save_mean:cdata(),
-      self.save_std:cdata(),
       self.train,
       self.momentum,
       self.eps,
@@ -162,8 +140,6 @@ end
 local function backward(self, input, gradOutput, scale, gradInput, gradWeight, gradBias)
    self:checkInputDim(input)
    self:checkInputDim(gradOutput)
-   assert(self.save_mean and self.save_std, 'must call :updateOutput() first')
-
    input, gradOutput = makeContiguous(self, input, gradOutput)
    self.gradInput = self.gradInput:mkl()
    scale = scale or 1
@@ -171,41 +147,22 @@ local function backward(self, input, gradOutput, scale, gradInput, gradWeight, g
    --   gradInput:resizeAs(gradOutput)
    --end
    
-   --if gradInput then
+   if gradInput then
       wrapper(getType(input),'BatchNormalization_backward',
          input:cdata(),
          gradOutput:cdata(),
          --THNN.optionalTensor(gradInput),
-         gradInput,
+         self.gradInput:cdata(),
          THNN.optionalTensor(gradWeight),
          THNN.optionalTensor(gradBias),
          THNN.optionalTensor(self.weight),
          self.running_mean:cdata(),
          self.running_var:cdata(),
-         self.save_mean:cdata(),
-         self.save_std:cdata(),
          self.train,
          scale,
          self.eps,
          self.dnnPrimitives:cdata(),self.mkldnnInitOk)
-   --[[
-   else
-      input.THNN.BatchNormalization_backward(
-         input:cdata(),
-         gradOutput:cdata(),
-         THNN.optionalTensor(gradInput),
-         THNN.optionalTensor(gradWeight),
-         THNN.optionalTensor(gradBias),
-         THNN.optionalTensor(self.weight),
-         self.running_mean:cdata(),
-         self.running_var:cdata(),
-         self.save_mean:cdata(),
-         self.save_std:cdata(),
-         self.train,
-         scale,
-         self.eps)
    end
-   ]]--
    return self.gradInput
 end
 
@@ -242,8 +199,6 @@ function BN:clearState()
       'normalized',
       '_input',
       '_gradOutput',
-      'save_mean',
-      'save_std',
    })
    return parent.clearState(self)
 end
