@@ -66,6 +66,11 @@ function convertAdvancedModel(src_module, cvtOP, prevOPFlag)
       print(layer_type)
       if(string.find(layer_type, 'SpatialConvolution')) then       
         --print('SC')
+        if not prevOPFlag then
+          print('----------need convertion before using this op    ' .. layer_type)
+          local convert_layer = mklnn.U2I()
+          dst_module:add(convert_layer)
+        end
         local nInputPlane,nOutputPlane = src_layer.nInputPlane, src_layer.nOutputPlane
         local kW,kH = src_layer.kW, src_layer.kH
         local dW,dH = src_layer.dW, src_layer.dH
@@ -78,6 +83,11 @@ function convertAdvancedModel(src_module, cvtOP, prevOPFlag)
          
       elseif(string.find(layer_type, 'SpatialMaxPooling')) then
         --print('SMP')
+        if not prevOPFlag then
+          print('----------need convertion before using this op    ' .. layer_type)
+          local convert_layer = mklnn.U2I()
+          dst_module:add(convert_layer)
+        end
         local kW,kH = src_layer.kW, src_layer.kH
         local dW,dH = src_layer.dW, src_layer.dH
         local padW,padH = src_layer.padW, src_layer.padH
@@ -87,6 +97,11 @@ function convertAdvancedModel(src_module, cvtOP, prevOPFlag)
      
       elseif(string.find(layer_type, 'SpatialAveragePooling')) then
         --print('SAP')
+        if not prevOPFlag then
+          print('----------need convertion before using this op    ' .. layer_type)
+          local convert_layer = mklnn.U2I()
+          dst_module:add(convert_layer)
+        end
         local kW,kH = src_layer.kW, src_layer.kH
         local dW,dH = src_layer.dW, src_layer.dH
         local padW,padH = src_layer.padW, src_layer.padH
@@ -96,6 +111,11 @@ function convertAdvancedModel(src_module, cvtOP, prevOPFlag)
         
       elseif(string.find(layer_type, 'SpatialCrossMapLRN')) then
         --print('LRN')
+        if not prevOPFlag then
+          print('----------need convertion before using this op    ' .. layer_type)
+          local convert_layer = mklnn.U2I()
+          dst_module:add(convert_layer)
+        end
         local size = src_layer.size
         local alpha, beta = src_layer.alpha, src_layer.bata
         local k = src_layer.k
@@ -114,9 +134,9 @@ function convertAdvancedModel(src_module, cvtOP, prevOPFlag)
           dst_module:add(dst_layer)        
        
       elseif(string.find(layer_type, 'Concat') or string.find(layer_type, 'Sequential')) then 
-        local sub_module = convertAdvancedModel(src_layer, cvtOP, prevOPFlag)
+        local model_flag, sub_module = convertAdvancedModel(src_layer, cvtOP, prevOPFlag)
         dst_module:add(sub_module)
-        prevOPFlag = true
+        prevOPFlag = model_flag
         
       else
         if prevOPFlag then
@@ -165,6 +185,7 @@ function convertAdvancedModel(src_module, cvtOP, prevOPFlag)
       end 
       dst_module:add(sub_module)
     end
+    prevOPFlag = cat_op_flag
   end
   --print(dst_module)
   return prevOPFlag, dst_module 
