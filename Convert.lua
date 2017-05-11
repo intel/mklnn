@@ -12,25 +12,21 @@ mklOP2thOP['mklnn.ReLU']                  = nn.ReLU
 mklOP2thOP['nn.ReLU']                     = nn.ReLU
 mklOP2thOP['mklnn.Concat']                = nn.Concat
 mklOP2thOP['nn.Concat']                   = nn.Concat
-mklOP2thOP['mklnn.View']                  = nn.View
-mklOP2thOP['mnn.View']                    = nn.View
 
 
 local thOP2mklOP = {}
-thOP2mklOP['nn.SpatialConvolution']       = nn.SpatialConvolution
-thOP2mklOP['mklnn.SpatialConvolution']    = nn.SpatialConvolution
-thOP2mklOP['nn.SpatialMaxPooling']        = nn.SpatialMaxPooling
-thOP2mklOP['mklnn.SpatialMaxPooling']     = nn.SpatialMaxPooling
-thOP2mklOP['nn.SpatialAveragePooling']    = nn.SpatialAveragePooling
-thOP2mklOP['mklnn.SpatialAveragePooling'] = nn.SpatialAveragePooling
-thOP2mklOP['nn.SpatialCrossMapLRN']       = nn.SpatialCrossMapLRN
-thOP2mklOP['mklnn.SpatialCrossMapLRN']    = nn.SpatialCrossMapLRN
-thOP2mklOP['nn.ReLU']                     = nn.ReLU
-thOP2mklOP['mklnn.ReLU']                  = nn.ReLU
-thOP2mklOP['nn.Concat']                   = nn.Concat
-thOP2mklOP['mklnn.Concat']                = nn.Concat
-thOP2mklOP['nn.View']                     = nn.View
-thOP2mklOP['mklnn.View']                  = nn.View
+thOP2mklOP['nn.SpatialConvolution']       = mklnn.SpatialConvolution
+thOP2mklOP['mklnn.SpatialConvolution']    = mklnn.SpatialConvolution
+thOP2mklOP['nn.SpatialMaxPooling']        = mklnn.SpatialMaxPooling
+thOP2mklOP['mklnn.SpatialMaxPooling']     = mklnn.SpatialMaxPooling
+thOP2mklOP['nn.SpatialAveragePooling']    = mklnn.SpatialAveragePooling
+thOP2mklOP['mklnn.SpatialAveragePooling'] = mklnn.SpatialAveragePooling
+thOP2mklOP['nn.SpatialCrossMapLRN']       = mklnn.SpatialCrossMapLRN
+thOP2mklOP['mklnn.SpatialCrossMapLRN']    = mklnn.SpatialCrossMapLRN
+thOP2mklOP['nn.ReLU']                     = mklnn.ReLU
+thOP2mklOP['mklnn.ReLU']                  = mklnn.ReLU
+thOP2mklOP['nn.Concat']                   = mklnn.Concat
+thOP2mklOP['mklnn.Concat']                = mklnn.Concat
 
 --[[
 NOTE:
@@ -69,7 +65,7 @@ function convertAdvancedModel(src_module, cvtOP, prevOPFlag)
       local name = src_layer.name
       -- print(name)
       local layer_type = torch.type(src_layer)
-      --print(layer_type)
+      print(layer_type)
       if(string.find(layer_type, 'SpatialConvolution')) then       
         --print('SC')
         local nInputPlane,nOutputPlane = src_layer.nInputPlane, src_layer.nOutputPlane
@@ -108,20 +104,16 @@ function convertAdvancedModel(src_module, cvtOP, prevOPFlag)
         local dst_layer = cvtOP[layer_type](size, alpha, beta, k)
         dst_module:add(dst_layer)
         prevOPFlag = 1
-    
-      elseif(string.find(layer_type, 'View')) then
-        --print('view')
-        local size = src_layer.size
-        local dst_layer = cvtOP[layer_type](size):setNumInputDims(3)
-        dst_module:add(dst_layer) 
-        prevOPFlag = 1
         
       elseif(string.find(layer_type, 'ReLU')) then
         --print('ReLU')
-        local ip = src_layer.inplace
-        local dst_layer = cvtOP[layer_type](ip)
-        dst_module:add(dst_layer)
-        prevOPFlag = 1 
+        local dst_layer = src_layer
+        if(prevOPFlag == 1) then
+          local ip = src_layer.inplace
+          dst_layer = cvtOP[layer_type](ip)
+          prevOPFlag = 1
+        end
+          dst_module:add(dst_layer)        
        
       elseif(string.find(layer_type, 'Concat') or string.find(layer_type, 'Sequential')) then 
         local sub_module = convertAdvancedModel(src_layer, cvtOP, prevOPFlag)
@@ -134,8 +126,8 @@ function convertAdvancedModel(src_module, cvtOP, prevOPFlag)
           local convert_layer = mklnn.I2U()
           dst_module:add(convert_layer)
         end
-        local new_layer = src_layer:clone()
-        dst_module:add(new_layer)
+        --local new_layer = src_layer:clone()
+        dst_module:add(src_layer)
         prevOPFlag = 0
       end
     end
