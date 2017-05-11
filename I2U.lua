@@ -6,14 +6,24 @@ function I2U:__init()
 end
 
 function I2U:updateOutput(input)
-   self.output = input:th()
-
-   return self.output
+   if input:type() == 'torch.MKLFloatTensor' then
+      self.output = input:th()
+      return self.output
+   else
+      print("Warning: I2U op forward, input is not torch.MKLFloatTensor")
+      return input
+   end
 end
 
 function I2U:updateGradInput(input, gradOutput)
 
-   self.gradInput = gradOutput:mkl()
 
-   return self.gradInput
+   if gradOutput:type() == 'torch.FloatTensor' then
+      self.gradInput = gradOutput:mkl()
+      return self.gradInput
+   else
+      print("Warning: I2U op backward, gradOutput is not torch.FloatTensor")
+      return gradOutput
+   end
+
 end
