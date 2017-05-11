@@ -13,6 +13,8 @@ function LRN:__init(size, alpha, beta, k)
    assert(self.size >= 1 and self.size <= 16, "size has to be between 1 and 16")
    assert(self.k >= 1e-5, "k has to be greater than 1e-5")
    assert(self.beta >= 0.01, "Beta has to be > 0.01")
+   self.output = self.output:mkl()
+   self.gradInput = self.gradInput:mkl()
 end
 
 function LRN:updateOutput(input)
@@ -23,7 +25,7 @@ function LRN:updateOutput(input)
       self.mkldnnInitOk = 0 
    end 
    self.dnnPrimitives = self.dnnPrimitives or torch.LongTensor(30)
-   self.output = self.output:mkl()
+
    --self.output:resizeAs(input)
 	  wrapper(getType(input),'CrossChannelLRN_updateOutput',
 	      input:cdata(),
@@ -40,7 +42,7 @@ end
 
 function LRN:updateGradInput(input, gradOutput)
    if not self.gradInput then return end
-   self.gradInput = self.gradInput:mkl()
+
    --self.gradInput:resizeAs(input)
    --assert(gradOutput:dim() == 3 or gradOutput:dim() == 4);
    --if not gradOutput:isContiguous() then

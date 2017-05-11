@@ -24,6 +24,8 @@ function SpatialConvolution:__init(nInputPlane, nOutputPlane, kW, kH, dW, dH, pa
    self.gradWeight = torch.Tensor(nOutputPlane, nInputPlane*kH*kW/self.group)
    self.gradBias = torch.Tensor(nOutputPlane)
 
+   self.output = self.output:mkl()
+   self.gradInput = self.gradInput:mkl()
 
    self:reset()
 end
@@ -72,7 +74,7 @@ function SpatialConvolution:updateOutput(input)
       self.mkldnnInitOk = 0
    end
    self.dnnPrimitives = self.dnnPrimitives or torch.LongTensor(30)
-   self.output = self.output:mkl()
+
 
    self.finput = torch.FloatTensor()
    self.fgradInput = torch.FloatTensor()
@@ -100,7 +102,6 @@ end
 function SpatialConvolution:updateGradInput(input, gradOutput)
    if self.gradInput then
       input, gradOutput = makeContiguous(self, input, gradOutput)
-      self.gradInput = self.gradInput:mkl()
       wrapper(getType(input),'SpatialConvolution_bwdData',
          input:cdata(),
          gradOutput:cdata(),

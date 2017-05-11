@@ -22,6 +22,10 @@ function SpatialMaxPooling:__init(kW, kH, dW, dH, padW, padH)
 
    self.ceil_mode = false
    self.indices = torch.Tensor()
+   self.output = self.output:mkl() --add
+   self.indices = self.indices:mkl() --add
+   self.gradInput = self.gradInput:mkl()
+
 end
 
 function SpatialMaxPooling:ceil()
@@ -57,8 +61,7 @@ function SpatialMaxPooling:updateOutput(input)
    self.ceil_mode = self.ceil_mode or false
    self.padW = self.padW or 0
    self.padH = self.padH or 0
-   self.output = self.output:mkl() --add
-   self.indices = self.indices:mkl() --add
+
     wrapper(getType(input),'SpatialMaxPooling_updateOutput',
        input:cdata(),
        self.output:cdata(),
@@ -73,7 +76,7 @@ function SpatialMaxPooling:updateOutput(input)
 end
 
 function SpatialMaxPooling:updateGradInput(input, gradOutput)
-   self.gradInput = self.gradInput:mkl()
+
    wrapper(getType(input),'SpatialMaxPooling_updateGradInput',
       input:cdata(),
       gradOutput:cdata(),

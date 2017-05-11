@@ -277,15 +277,9 @@ void MKLNN_(SpatialMaxPooling_updateOutput)(
 
   /* get contiguous input */
   input = THTensor_(newContiguous)(input);
-  //THTensor_(resize4d)(output, nbatch, nslices, oheight, owidth);
   TH_MKL_(resize4d)(output, nbatch, nslices, oheight, owidth);
-  /* indices will contain the locations for each output point */
-  //THTensor_(resize4d)(indices, nbatch, nslices, oheight, owidth);
-  TH_MKL_(resize4d)(indices, nbatch, nslices, oheight, owidth);
-
   input_data = TH_MKL_(data)(input);
   output_data = TH_MKL_(data)(output);
-  indices_data = TH_MKL_(data)(indices);
 
   /**************************************MKLDNN interface*****************************************/
   struct timeval start,end;

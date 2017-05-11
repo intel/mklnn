@@ -14,7 +14,8 @@ function Threshold:__init(th,v,ip)
    if (ip and type(ip) ~= 'boolean') then
       error('in-place flag must be boolean')
    end
-
+   self.gradInput = self.gradInput:mkl()
+   self.output = self.output:mkl()
    self:validateParameters()
 end
 
@@ -25,7 +26,7 @@ function Threshold:updateOutput(input)
       self.mkldnnInitOk = 0
    end
    self.dnnPrimitives = self.dnnPrimitives or torch.LongTensor(11)
-   self.output = self.output:mkl()
+
    self:validateParameters()
    wrapper(getType(input),'Threshold_updateOutput',
            input:cdata(),
@@ -41,7 +42,7 @@ end
 
 function Threshold:updateGradInput(input, gradOutput)
    self:validateParameters()
-   self.gradInput = self.gradInput:mkl()
+
    wrapper(getType(input),'Threshold_updateGradInput',
               input:cdata(),
               gradOutput:cdata(),
