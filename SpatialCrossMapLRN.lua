@@ -1,4 +1,4 @@
-local LRN, parent = torch.class('mklnn.LRN', 'nn.Module')
+local LRN, parent = torch.class('mklnn.SpatialCrossMapLRN', 'nn.Module')
 local ffi = require 'ffi'
 
 local wrapper = mklnn.wrapper
