@@ -56,7 +56,7 @@ function SpatialMaxPooling:updateOutput(input)
    end
    self.dnnPrimitives = self.dnnPrimitives or torch.LongTensor(16)
 
-   self.indices = self.indices or input.new()
+   --self.indices = self.indices or input.new()
    -- backward compatibility
    self.ceil_mode = self.ceil_mode or false
    self.padW = self.padW or 0

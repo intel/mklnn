@@ -49,6 +49,7 @@ local convert = function(src_model, th2mkl)
     return nil
   end
   model_flag, model = convertAdvancedModel(src_model, cvtOp, false)    -- false: regular true: mklnn
+  return model
 end
 
 function convertAdvancedModel(src_module, cvtOP, prevOPFlag)
@@ -163,7 +164,7 @@ function convertAdvancedModel(src_module, cvtOP, prevOPFlag)
       if (nil == last_op_flag) then
         last_op_flag = sub_module_flag
         cat_op_flag = sub_module_flag
-      elseif (last_op_flag != sub_module_flag)
+      elseif (last_op_flag ~= sub_module_flag) then
         cat_op_flag = false                  -- true; regular 
         add_op_flag = false
       end
