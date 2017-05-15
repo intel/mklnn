@@ -16,8 +16,6 @@ function I2U:updateOutput(input)
 end
 
 function I2U:updateGradInput(input, gradOutput)
-
-
    if gradOutput:type() == 'torch.FloatTensor' then
       self.gradInput = gradOutput:mkl()
       return self.gradInput
