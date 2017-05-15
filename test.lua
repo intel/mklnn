@@ -231,7 +231,7 @@ function mklnntest.SpatialCrossMapLRN()
    local k = math.random(1,3)
    
    local oriModule = nn.SpatialCrossMapLRN(size, alpha, beta, k):float()
-   local dnnModule = mklnn.LRN(size, alpha, beta, k):float()
+   local dnnModule = mklnn.SpatialCrossMapLRN(size, alpha, beta, k):float()
    local batchSize = math.random(1,5)
    local from = math.random(3,8)
    local input = torch.rand(batchSize,from, inputSize, inputSize):float()

@@ -22,9 +22,7 @@ function SpatialMaxPooling:__init(kW, kH, dW, dH, padW, padH)
 
    self.ceil_mode = false
    self.indices = torch.Tensor()
-   self.output = self.output:mkl() --add
-   self.indices = self.indices:mkl() --add
-   self.gradInput = self.gradInput:mkl()
+
 
 end
 
@@ -55,6 +53,10 @@ function SpatialMaxPooling:updateOutput(input)
       self.mkldnnInitOk = 0
    end
    self.dnnPrimitives = self.dnnPrimitives or torch.LongTensor(16)
+
+   self.output = self.output:mkl() --add
+   self.indices = self.indices:mkl() --add
+   self.gradInput = self.gradInput:mkl()
 
    --self.indices = self.indices or input.new()
    -- backward compatibility

@@ -24,8 +24,7 @@ function SpatialConvolution:__init(nInputPlane, nOutputPlane, kW, kH, dW, dH, pa
    self.gradWeight = torch.Tensor(nOutputPlane, nInputPlane*kH*kW/self.group)
    self.gradBias = torch.Tensor(nOutputPlane)
 
-   self.output = self.output:mkl()
-   self.gradInput = self.gradInput:mkl()
+
 
    self:reset()
 end
@@ -75,6 +74,8 @@ function SpatialConvolution:updateOutput(input)
    end
    self.dnnPrimitives = self.dnnPrimitives or torch.LongTensor(30)
 
+   self.output = self.output:mkl()
+   self.gradInput = self.gradInput:mkl()
 
    self.finput = torch.FloatTensor()
    self.fgradInput = torch.FloatTensor()
