@@ -8,7 +8,7 @@ local ffi = require 'ffi'
 
 local wrapper = function(dataType,f,...)
    local funcName = 'MKLNN_'..dataType..f
-   print("funcName = ", funcName)
+   --print("funcName = ", funcName)
    return C[funcName](...)
 end
 mklnn.wrapper = wrapper

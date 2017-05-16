@@ -17,8 +17,6 @@ function SpatialMaxPooling:__init(kW, kH, dW, dH, padW, padH)
    self.padW = padW or 0
    self.padH = padH or 0
 
-   --self:setEngine(1)
-
 
    self.ceil_mode = false
    self.indices = torch.Tensor()
@@ -37,15 +35,6 @@ function SpatialMaxPooling:floor()
 end
 
 function SpatialMaxPooling:updateOutput(input)
-   --self:updateForLoadSnapshot()
-   --[[
-   if self.initStep == 0 then
-      self.initStep = 1
-      self.dnnPrimitives = torch.LongTensor(16)
-   else
-      self.mkldnnInitOk = 1
-   end
-   ]]--
 
    if self.dnnPrimitives then
       self.mkldnnInitOk = 1
@@ -64,6 +53,7 @@ function SpatialMaxPooling:updateOutput(input)
    self.padW = self.padW or 0
    self.padH = self.padH or 0
 
+   --print("SpatialMaxPooling output nElement = ",self.output:nElement())
     wrapper(getType(input),'SpatialMaxPooling_updateOutput',
        input:cdata(),
        self.output:cdata(),
@@ -94,7 +84,7 @@ end
 
 -- for backward compat
 function SpatialMaxPooling:empty()
-   self:clearState()
+   --self:clearState()
 end
 
 function SpatialMaxPooling:__tostring__()
@@ -112,5 +102,5 @@ function SpatialMaxPooling:clearState()
    if self.indices then
       self.indices:set()
    end
-   return parent.clearState(self)
+   --return parent.clearState(self)
 end

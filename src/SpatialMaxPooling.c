@@ -242,7 +242,7 @@ void MKLNN_(SpatialMaxPooling_updateOutput)(
   real *output_data;
   real *indices_data;
   //change
-  printf("input->tensor->nDimension = %d ........\n",input->tensor->nDimension);
+  //printf("input->tensor->nDimension = %d ........\n",input->tensor->nDimension);
   THArgCheck(input->tensor->nDimension == 3 || input->tensor->nDimension == 4, 2, "3D or 4D (batch mode) tensor expected");
   //change
   if (input->tensor->nDimension == 4) {
