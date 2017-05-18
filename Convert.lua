@@ -92,7 +92,7 @@ function convertAdvancedModel(src_module, cvtOP, prevOPFlag)
         local kW,kH = src_layer.kW, src_layer.kH
         local dW,dH = src_layer.dW, src_layer.dH
         local padW,padH = src_layer.padW, src_layer.padH
-        local dst_layer = cvtOP[layer_type](kW, kH, dW, dH, padW, padH):ceil()
+        local dst_layer = cvtOP[layer_type](kW, kH, dW, dH, padW, padH)
         dst_module:add(dst_layer)
         prevOPFlag = true
      
