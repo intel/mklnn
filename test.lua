@@ -55,12 +55,15 @@ function mklnntest.SpatialConvolution_g1()
    dnnModule.bias:copy(oriModule.bias)
    local oriOutput = oriModule:forward(input)
    local dnnOutput = dnnModule:forward(input_clone)
-   mytester:assertTensorEq(oriOutput, dnnOutput:th(), 0.00001, 'mklnn.SpatialConvolution g1 output')
+   dnnOutput = dnnOutput:th()
+   print("oriOutput size = ", oriOutput:size())
+   print("dnnOutput size = ", dnnOutput:size())
+   mytester:assertTensorEq(oriOutput, dnnOutput, 0.00001, 'mklnn.SpatialConvolution g1 output')
    local oriGradInput = oriModule:backward(input, gradOutput)
    local dnnGradInput = dnnModule:backward(input_clone, gradOutput_clone)
    mytester:assertTensorEq(oriGradInput, dnnGradInput:th(), 0.00001, 'mklnn.SpatialConvolution g1 gradInput')
-end
 
+end
 
 function mklnntest.ReLU()
    local batch = math.random(2,5)
@@ -246,6 +249,61 @@ function mklnntest.SpatialCrossMapLRN()
    mytester:assertTensorEq(oriGradInput, dnnGradInput, 0.00001, 'mklnn.SpatialCrossMapLRN gradInput')
 end
 
+function mklnntest.Concat()
+     -- batch
+   local from = math.random(2,5)
+   local inc = math.random(2,4)
+   local to = from+inc
+   local ki = math.random(1,5)
+
+   local kj = ki 
+   local si = math.random(1,4)
+   local sj = si 
+   local batch = math.random(2,5)
+
+   local ini = math.random(3,7)*2+1
+   local num_modules = math.random(2, 5)
+   local inj = ini
+
+   local input = torch.randn(batch, from, ini, ini):float()
+   local input_clone = input:clone():mkl()
+   
+   local convs = {} 
+   local convs_clone = {} 
+   for i = 1,num_modules do
+      convs[i] = nn.SpatialConvolution(from, to, ki, kj, si, sj):float()
+      clone_tmp = mklnn.SpatialConvolution(from, to, ki, kj, si, sj):float()
+      clone_tmp.weight:copy(convs[i].weight)
+      clone_tmp.bias:copy(convs[i].bias)
+      convs_clone[i] = clone_tmp
+      inc = math.random(2,4)
+      to = to + inc
+   end  
+
+   local dnnModule = mklnn.Concat(2):float()
+   local oriModule = nn.Concat(2):float()
+
+   for _,module in ipairs(convs) do
+      oriModule:add(module)
+   end  
+
+   for _,module in ipairs(convs_clone) do
+      dnnModule:add(module)
+   end  
+
+   local oriOutput = oriModule:forward(input)
+   local dnnOutput = dnnModule:forward(input_clone)
+   mytester:assertTensorEq(oriOutput, dnnOutput:th(), 0.00001, 'mklnn.Concat forward err')
+
+   local gradOutput = torch.randn(oriOutput:size()):float()
+   local gradOutput_clone = gradOutput:clone():mkl()
+
+   local oriGradInput = oriModule:backward(input, gradOutput)
+   local dnnGradInput = dnnModule:backward(input_clone, gradOutput_clone)
+   
+   mytester:assertTensorEq(oriGradInput, dnnGradInput:mkl(), 0.00001, 'mklnn.Concat backward err (gradInput)')
+
+end
 
 mytester:add(mklnntest)
 jac = nn.Jacobian

@@ -29,6 +29,8 @@
 #include "generateAllTypes.h"
 #include "src/SpatialCrossMapLRN.c"
 #include "generateAllTypes.h"
+#include "src/Concat.c"
+#include "generateAllTypes.h"
 
 
 /*

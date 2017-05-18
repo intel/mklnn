@@ -224,6 +224,24 @@ void MKLNN_RealCrossChannelLRN_backward(
   THLongTensor *primitives,
   int initOk);
 
+void MKLNN_RealConcat_setupLongTensor(
+          THLongTensor * array,
+          THMKLRealTensor *input,
+          int  index);
+
+void MKLNN_RealConcat_updateOutput(
+          THLongTensor *inputarray,
+          THMKLRealTensor *output,
+          int  moduleNum,
+          THLongTensor *primitives,
+          int initOk);
+
+void MKLNN_RealConcat_backward_split(
+          THLongTensor *gradarray,
+          THMKLRealTensor *gradOutput,
+          int  moduleNum,
+          THLongTensor *primitives,
+          int initOk);
 
 ]]
 

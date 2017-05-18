@@ -191,10 +191,6 @@ void MKLNN_(BatchNormalization_updateOutput)(
   BatchNorm_res[dnnResourceDst] = TH_MKL_(data)(output);
   BatchNorm_res[dnnResourceWorkspace] = buffer_forward_workspace;
   BatchNorm_res[dnnResourceScaleShift] = buffer_forward_scaleshift;
-  printf(" BatchNorm_res[dnnResourceSrc] = 0x%x \n", BatchNorm_res[dnnResourceSrc]);
-  printf(" BatchNorm_res[dnnResourceDst] = 0x%x \n", BatchNorm_res[dnnResourceDst]);
-  printf(" BatchNorm_res[dnnResourceWorkspace] = 0x%x \n", BatchNorm_res[dnnResourceWorkspace]);
-  printf(" BatchNorm_res[dnnResourceShift] = 0x%x \n", BatchNorm_res[dnnResourceScaleShift]);
   CHECK_ERR( dnnExecute_F32(bn_forward, (void*)BatchNorm_res), err );
   output->mkldnnLayout = (long long)primitives->storage->data[BN_LAYOUT_FORWARD_OUTPUT];
   //output->storageOffset = 0;

@@ -40,6 +40,7 @@ require('mklnn.SpatialBatchNormalization')
 require('mklnn.SpatialCrossMapLRN')
 require('mklnn.I2U')
 require('mklnn.U2I')
+require('mklnn.Concat')
 
 mklnn.convert = require('mklnn.Convert')
 return mklnn

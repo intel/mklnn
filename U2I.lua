@@ -7,7 +7,7 @@ end
 
 function U2I:updateOutput(input)
    if input:type() == 'torch.FloatTensor' then
-      self.output = input:clone():mkl()
+      self.output = input:mkl()
       return self.output
    else
       print("Warning: U2I op forward, input is not torch.FloatTensor")
