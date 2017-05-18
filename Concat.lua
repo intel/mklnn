@@ -31,9 +31,6 @@ function Concat:updateOutput(input)
       local currentOutput = self:rethrowErrors(self.modules[i], i, 'updateOutput', input)
       outs[i] = currentOutput
       outputTable = currentOutput:cdata()
-      --print("module type =",self.modules[i].modules[1],"module engine = ",self.modules[i].modules[1]:getEngine()," module.kW = ",self.modules[i].modules[1].kW)
-      --setup the array for MKLDNN
-      --input.THNN.Concat_MKLDNN_setupLongTensor(self.outputArray:cdata(), currentOutput:cdata(), i)
       wrapper(getType(currentOutput),
              'Concat_setupLongTensor',
               self.outputArray:cdata(),
@@ -48,12 +45,12 @@ function Concat:updateOutput(input)
    end
 
    self.output:resize(self.outputSize)
-
-   -- use MKLDNN to concat
-   --input.THNN.Concat_MKLDNN_updateOutput(self.outputArray:cdata(), self.output:cdata(), tonumber(#self.modules),self.dnnPrimitives:cdata(),self.mkldnnInitOk)
+   self.output = self.output:mkl()
    wrapper(getType(self.output),
           'Concat_updateOutput',
+          self.outputArray:cdata(),
           self.output:cdata(),
+          tonumber(#self.modules),
           self.dnnPrimitives:cdata(),
           self.mkldnnInitOk
           )
@@ -69,16 +66,12 @@ function Concat:updateGradInput(input, gradOutput)
       local gradOutputPart = torch.MKLFloatTensor()
       gradOutputPart:resizeAs(module.output)
       gradOutputBuffer[i] = gradOutputPart
-      --input.THNN.Concat_MKLDNN_setupLongTensor(self.gradOutputArray:cdata(), gradOutputPart:cdata(), i)
       wrapper(getType(gradOutputPart),
              'Concat_setupLongTensor',
               self.gradOutputArray:cdata(),
               gradOutputPart:cdata(),
               i)
    end
-
-   --split gradOutput to  gradOutputArray
-   --input.THNN.Concat_MKLDNN_backward_split(self.gradOutputArray:cdata(), gradOutput:cdata(), tonumber(#self.modules),self.dnnPrimitives:cdata(),self.mkldnnInitOk)
    wrapper(getType(gradOutput),
           'Concat_updateOutput',
           gradOutput:cdata(),
@@ -121,7 +114,6 @@ function Concat:accGradParameters(input, gradOutput, scale)
             iterBackward = sys.clock() - iterStartTime
             backwardTime = backwardTime+ iterBackward
       end
-
       self:rethrowErrors(module, i, 'accGradParameters',
           input,
           gradOutputPart,
@@ -134,29 +126,27 @@ function Concat:accGradParameters(input, gradOutput, scale)
 end
 
 function Concat:backward(input, gradOutput, scale)
+   self.gradInput = self.gradInput:mkl()
    self.gradInput:resizeAs(input)
    local gradOutputBuffer = {}
    for i,module in ipairs(self.modules) do
-      local gradOutputPart = torch.MKLFloatTensor()
+      local gradOutputPart = torch.FloatTensor():mkl()
       gradOutputPart:resizeAs(module.output)
       gradOutputBuffer[i] = gradOutputPart
-      --input.THNN.Concat_MKLDNN_setupLongTensor(self.gradOutputArray:cdata(), gradOutputPart:cdata(), i)
       wrapper(getType(gradOutputPart),
              'Concat_setupLongTensor',
               self.gradOutputArray:cdata(),
               gradOutputPart:cdata(),
               i)
    end
-
-   --split gradOutput to  gradOutputArray
-   --input.THNN.Concat_MKLDNN_backward_split(self.gradOutputArray:cdata(), gradOutput:cdata(), tonumber(#self.modules),self.dnnPrimitives:cdata(),self.mkldnnInitOk)
    wrapper(getType(gradOutput),
-          'Concat_updateOutput',
+          'Concat_backward_split',
+          self.gradOutputArray:cdata(),
           gradOutput:cdata(),
+          tonumber(#self.modules),
           self.dnnPrimitives:cdata(),
           self.mkldnnInitOk
           )
-
    for i,module in ipairs(self.modules) do
       local currentOutput = module.output
       gradOutputPart = gradOutputBuffer[i]
@@ -169,6 +159,7 @@ function Concat:backward(input, gradOutput, scale)
             self.gradInput:add(currentGradInput)
          end
       end
+
    end
    return self.gradInput
 end

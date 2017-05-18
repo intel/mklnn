@@ -56,8 +56,6 @@ function mklnntest.SpatialConvolution_g1()
    local oriOutput = oriModule:forward(input)
    local dnnOutput = dnnModule:forward(input_clone)
    dnnOutput = dnnOutput:th()
-   print("oriOutput size = ", oriOutput:size())
-   print("dnnOutput size = ", dnnOutput:size())
    mytester:assertTensorEq(oriOutput, dnnOutput, 0.00001, 'mklnn.SpatialConvolution g1 output')
    local oriGradInput = oriModule:backward(input, gradOutput)
    local dnnGradInput = dnnModule:backward(input_clone, gradOutput_clone)
@@ -301,8 +299,7 @@ function mklnntest.Concat()
    local oriGradInput = oriModule:backward(input, gradOutput)
    local dnnGradInput = dnnModule:backward(input_clone, gradOutput_clone)
    
-   mytester:assertTensorEq(oriGradInput, dnnGradInput:mkl(), 0.00001, 'mklnn.Concat backward err (gradInput)')
-
+   mytester:assertTensorEq(oriGradInput, dnnGradInput:th(), 0.00001, 'mklnn.Concat backward err (gradInput)')
 end
 
 mytester:add(mklnntest)
