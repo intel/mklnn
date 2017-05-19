@@ -187,6 +187,66 @@ function mklnntest.SpatialMaxPooling()
   end
 end
 
+function mklnntest.SpatialAveragePooling()
+   for _,count_include_pad in pairs({true,false}) do
+      for _,ceil_mode in pairs({true,false}) do      
+         local from = math.random(1,5)
+         local ki = math.random(1,7)      
+         local kj = ki
+         local si = math.random(1,3)
+         local sj = si
+         local padW = 0
+        --mkldnn has trouble in computation when count_include_pad
+         if not count_include_pad then
+	    padW = math.min(math.random(0,1),math.floor(ki/2))
+	 end
+         local padH = padW
+         local mode_string = ceil_mode and 'ceil' or 'floor'
+         -- batch
+         local batch = math.random(2,5)
+         local outi = math.random(4,5)*2+1
+         local outj = outi
+
+         local ini = (outi-1)*si+ki-2*padW
+         local inj = (outj-1)*sj+kj-2*padH
+         local oriModule = nn.SpatialAveragePooling(ki, kj, si, sj, padW, padH):float()
+         local dnnModule = mklnn.SpatialAveragePooling(ki, kj, si, sj, padW, padH):float()
+         if ceil_mode then 
+            oriModule:ceil() 
+            dnnModule:ceil()
+         else 
+            oriModule:floor() 
+            dnnModule:floor()
+         end
+        
+         if count_include_pad then
+            oriModule:setCountIncludePad()
+            dnnModule:setCountIncludePad()
+            mode_string = mode_string .. 'SpatialAveragePoolingMKLDNN - count include padding'
+         else
+            oriModule:setCountExcludePad()
+            dnnModule:setCountExcludePad()
+            mode_string = mode_string .. 'SpatialAveragePoolingMKLDNN - count exclude padding'
+         end
+        
+         local input = torch.Tensor(batch,from,inj,ini):uniform():float()
+         local gradOutput = torch.Tensor(batch,from,outj,outi):uniform():float()
+         local input_clone = input:clone():mkl()
+	 local gradOutput_clone = gradOutput:clone():mkl()
+	 local oriOutput = oriModule:forward(input)
+	 local dnnOutput = dnnModule:forward(input_clone)
+	 mytester:assertTensorEq(oriOutput, dnnOutput:th(), 0.00001, 'SpatialAveragePoolingMKLDNN output'..mode_string..' on state ')
+		
+	 local oriGradInput = oriModule:backward(input, gradOutput)
+	 local dnnGradInput = dnnModule:backward(input_clone, gradOutput_clone)
+	 mytester:assertTensorEq(oriGradInput, dnnGradInput:th(), 0.00001, 'SpatialAveragePoolingMKLDNN gradInput'..mode_string..' on state ')
+		
+      end
+   end
+
+end
+
+
 
 function mklnntest.SpatialBatchNormalization()
    local planes = torch.random(1,6)

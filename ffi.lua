@@ -243,6 +243,33 @@ void MKLNN_RealConcat_backward_split(
           THLongTensor *primitives,
           int initOk);
 
+void MKLNN_RealSpatialAveragePooling_updateOutput(
+          THMKLRealTensor *input,
+          THMKLRealTensor *output,
+          int kW,
+          int kH,
+          int dW,
+          int dH,
+          int padW,
+          int padH,
+          bool ceil_mode,
+          bool count_include_pad,
+          THLongTensor *primitives,
+          int initOk);
+void MKLNN_RealSpatialAveragePooling_updateGradInput(
+          THMKLRealTensor *input,
+          THMKLRealTensor *gradOutput,
+          THMKLRealTensor *gradInput,
+          int kW,
+          int kH,
+          int dW,
+          int dH,
+          int padW,
+          int padH,
+          bool ceil_mode,
+          bool count_include_pad,
+          THLongTensor *primitives,
+          int initOk);
 ]]
 
 

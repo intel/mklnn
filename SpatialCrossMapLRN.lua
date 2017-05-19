@@ -27,16 +27,16 @@ function LRN:updateOutput(input)
    self.output = self.output:mkl()
    self.gradInput = self.gradInput:mkl()
    --self.output:resizeAs(input)
-	  wrapper(getType(input),'CrossChannelLRN_updateOutput',
-	      input:cdata(),
-	      self.output:cdata(),
-	      self.size,
-	      self.alpha,
-	      self.beta,
-	      self.k,
-	      self.dnnPrimitives:cdata(),
-	      self.mkldnnInitOk
-	      )
+   wrapper(getType(input),'CrossChannelLRN_updateOutput',
+      input:cdata(),
+      self.output:cdata(),
+      self.size,
+      self.alpha,
+      self.beta,
+      self.k,
+      self.dnnPrimitives:cdata(),
+      self.mkldnnInitOk
+      )
    return self.output
 end
 

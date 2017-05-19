@@ -25,6 +25,8 @@
 #include "generateAllTypes.h"
 #include "src/SpatialMaxPooling.c"
 #include "generateAllTypes.h"
+#include "src/SpatialAveragePooling.c"
+#include "generateAllTypes.h"
 #include "src/BatchNormalization.c"
 #include "generateAllTypes.h"
 #include "src/SpatialCrossMapLRN.c"
