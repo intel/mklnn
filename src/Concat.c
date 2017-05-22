@@ -18,7 +18,8 @@ static void MKLNN_(Concat_init_forward)(
 	THMKLTensor * input = NULL;
 	long inputPtr = 0;
 	dnnLayout_t *layouts = malloc(moduleNum * sizeof(dnnLayout_t));
-	for(int i=0; i < moduleNum; i++)
+        int i;
+	for(i=0; i < moduleNum; i++)
 	{
 		inputPtr = inputarray->storage->data[i];
 		input = (THMKLTensor *)inputPtr;
@@ -114,7 +115,8 @@ static void MKLNN_(Concat_init_backward)(
 	THMKLTensor * grad = NULL;
 	long gradPtr = 0;
 	size_t split_channels[10]; 
-	for(int i=0; i < moduleNum; i++)
+        int i;
+	for(i=0; i < moduleNum; i++)
 	{
 		gradPtr = gradarray->storage->data[i];
 		grad = (THMKLTensor *)gradPtr;
@@ -171,7 +173,8 @@ void MKLNN_(Concat_updateOutput)(
 	long inputPtr = 0;
 	dnnLayout_t *layouts = NULL;
 	void *concat_res[dnnResourceNumber];
-	for(int i=0; i < moduleNum; i++)
+        int i;
+	for(i=0; i < moduleNum; i++)
 	{
 		inputPtr = inputarray->storage->data[i];
 		input = (THMKLTensor *)inputPtr;
@@ -217,7 +220,8 @@ void MKLNN_(Concat_backward_split)(
 	long gradPtr = 0;
 	void *split_res[dnnResourceNumber];
 	split_res[dnnResourceSrc] = TH_MKL_(data)(gradOutput);
-	for(int i=0; i < moduleNum; i++)
+        int i;
+	for(i=0; i < moduleNum; i++)
 	{
 		gradPtr = gradarray->storage->data[i];
 		grad = (THMKLTensor *)gradPtr;
