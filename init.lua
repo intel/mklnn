@@ -42,6 +42,7 @@ require('mklnn.SpatialCrossMapLRN')
 require('mklnn.I2U')
 require('mklnn.U2I')
 require('mklnn.Concat')
+require('mklnn.Concat2')
 
 mklnn.convert = require('mklnn.Convert')
 return mklnn
