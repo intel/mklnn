@@ -92,7 +92,11 @@ function convertAdvancedModel(src_module, cvtOP, prevOPFlag)
         local kW,kH = src_layer.kW, src_layer.kH
         local dW,dH = src_layer.dW, src_layer.dH
         local padW,padH = src_layer.padW, src_layer.padH
+        local ceil_mode = src_layer.ceil_mode
         local dst_layer = cvtOP[layer_type](kW, kH, dW, dH, padW, padH)
+        if(ceil_mode) then
+          dst_layer:ceil()
+        end
         dst_module:add(dst_layer)
         prevOPFlag = true
      
@@ -106,7 +110,16 @@ function convertAdvancedModel(src_module, cvtOP, prevOPFlag)
         local kW,kH = src_layer.kW, src_layer.kH
         local dW,dH = src_layer.dW, src_layer.dH
         local padW,padH = src_layer.padW, src_layer.padH
+        ceil_mode = src_layer.ceil_mode
+        count_include_pad = src_layer.count_include_pad
         local dst_layer = cvtOP[layer_type](kW, kH, dW, dH, padW, padH)
+        
+        if(ceil_mode) then
+          dst_layer:ceil()
+        end
+        if(not count_include_pad) then
+          dst_layer:setCountExcludePad()
+        end
         dst_module:add(dst_layer)
         prevOPFlag = true
         
@@ -158,34 +171,80 @@ function convertAdvancedModel(src_module, cvtOP, prevOPFlag)
     local op_flag_table = {}
     local sub_module_table = {}
     local add_op = false
+    print("===========brefore", cat_op_flag)
     for j = 1, src_module:size() do 
       local dnn = src_module:get(j)
       local sub_module_flag, sub_module = convertAdvancedModel(dnn, cvtOP, prevOPFlag)
       if (nil == last_op_flag) then
         last_op_flag = sub_module_flag
-        cat_op_flag = sub_module_flag
+        cat_op_flag = last_op_flag
       elseif (last_op_flag ~= sub_module_flag) then
-        cat_op_flag = false                  -- true; regular 
-        add_op_flag = false
+        cat_op_flag = false                  -- true:mklnn 
+        add_op_flag = true
       end
       table.insert(op_flag_table, sub_module_flag)
       table.insert(sub_module_table, sub_module)    
     end 
     
+    print("===========after", prevOPFlag, cat_op_flag)
+
+
     if cat_op_flag then
-      dst_module = src_module
+      concat_module = mklnn.Concat(dimension)
+    elseif( prevOPFlag ) then
+      concat_module = mklnn.Concat2(dimension)
     else
-      dst_module = mklnn.Concat(dimension)
+      concat_module = nn.Concat(dimension)
     end
     
     for j = 1, src_module:size() do
-      local sub_module = sub_module_table[j]
-      if add_op_flag and op_flag_table[j] then
-        local convert_layer = mklnn.I2U()
-        sub_module:add(convert_layer)         
+      local sub_module = nil
+--[[
+      if prevOPFlag ~= cat_op_flag then
+        sub_module = nn.Sequential()
+        if cat_op_flag then
+          local convert_layer = mklnn.I2U()
+          sub_module:add(convert_layer)
+        else
+          local convert_layer = mklnn.U2I()
+          sub_module:add(convert_layer)
+        end
+        sub_module:add(sub_module_table[j])
+      else
+        sub_module = sub_module_table[j]
+      end
+]]--
+        sub_module = sub_module_table[j]
+      if add_op_flag and op_flag_table[j] ~= cat_op_flag then  
+--        if op_flag_table[j] then
+          local convert_layer = mklnn.I2U()
+          sub_module:add(convert_layer)
+--[[        else
+          local convert_layer = mklnn.U2I()
+          sub_module:add(convert_layer)
+        end
+]]--
       end 
-      dst_module:add(sub_module)
+      concat_module:add(sub_module)
     end
+    if dst_module then
+      dst_module:add(concat_module)
+    else
+      dst_module = concat_module
+    end
+
+--[[
+    if (prevOPFlag ~= cat_op_flag) then
+      dst_module = nn.Sequential()
+      if prevOPFlag then
+         local convert_layer = mklnn.I2U()
+         dst_module:add(convert_layer)
+      else
+         local convert_layer = mklnn.U2I()
+         dst_module:add(convert_layer)
+      end
+    end
+]]--
     prevOPFlag = cat_op_flag
   end
   --print(dst_module)

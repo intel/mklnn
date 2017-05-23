@@ -43,9 +43,11 @@ function Concat:updateOutput(input)
       end
 
    end
+   
 
-   self.output:resize(self.outputSize)
+
    self.output = self.output:mkl()
+   self.output:resize(self.outputSize)
    wrapper(getType(self.output),
           'Concat_updateOutput',
           self.outputArray:cdata(),
