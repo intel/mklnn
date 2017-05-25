@@ -327,7 +327,7 @@ void MKLNN_(SpatialAveragePooling_updateOutput)(
 #if LOG_ENABLE || MKL_TIME
 	gettimeofday(&end,NULL);
 	double duration = (end.tv_sec - start.tv_sec) * 1000 + (double)(end.tv_usec - start.tv_usec) /1000;
-	fprintf(stderr,"	AveragPooling MKLDNN time forward = %.2f ms\n",duration );
+	fprintf(stderr,"	AveragePooling MKLDNN time forward = %.2f ms\n",duration );
 #endif
   /* cleanup */
   //THTensor_(free)(input);
@@ -434,7 +434,7 @@ void MKLNN_(SpatialAveragePooling_updateGradInput)(
 	if(cv_backward_output)
 	{
 #if CONVERSION_LOG
-		fprintf(stderr, "	Maxpooling backward output conversion\n");
+		fprintf(stderr, "	Averagepooling backward output conversion\n");
 #endif
 		resPool1[dnnResourceDiffDst] = buffer_backward_output;
 		CHECK_ERR( dnnConversionExecute_F32(cv_backward_output, gradOutput_data, resPool1[dnnResourceDiffDst]), err );

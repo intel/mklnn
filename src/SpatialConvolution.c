@@ -450,7 +450,7 @@ void MKLNN_(SpatialConvolution_forward)(
   fprintf(stderr, "	output->size[0]=%d,output->size[1]=%d,output->size[2]=%d,output->size[3]=%d \n", output->size[0],output->size[1],output->size[2],output->size[3]);
   fprintf(stderr, "	weight->size[0]=%d,weight->size[1]=%d\n", weight->size[0],weight->size[1]);
   fprintf(stderr, "	bias->nDimension=%d,bias->size[0]=%d,bias->storage->data[0]=%.3f\n", bias->nDimension,bias->size[0],bias->storage->data[0]);
-  fprintf(stderr, " cv_forward_input=0x%x,cv_forward_filter=0x%x,cv_forward_bias=0x%x,cv_forward_output=0x%x",cv_forward_input,cv_forward_filter,cv_forward_bias,cv_forward_output);
+  fprintf(stderr, " cv_forward_input=0x%x,cv_forward_filter=0x%x,cv_forward_bias=0x%x,cv_forward_output=0x%x \n",cv_forward_input,cv_forward_filter,cv_forward_bias,cv_forward_output);
 #endif
   long i = 0;
   real * inPtr = TH_MKL_(data)(input);
@@ -514,11 +514,11 @@ void MKLNN_(SpatialConvolution_forward)(
   gettimeofday(&end,NULL);
   double duration1 = (mid.tv_sec - start.tv_sec) * 1000 + (double)(mid.tv_usec - start.tv_usec) /1000;
   double duration2 = (end.tv_sec - mid.tv_sec) * 1000 + (double)(end.tv_usec - mid.tv_usec) /1000;
-  fprintf(stderr,"	forward MKLDNN time1 = %.2f ms, time2 = %.2f\nms",duration1,duration2);
+  fprintf(stderr,"	forward MKLDNN time1 = %.2f ms, time2 = %.2f ms\n",duration1,duration2);
   double convert_time1 = (convert1.tv_sec - mid.tv_sec) * 1000 + (double)(convert1.tv_usec - mid.tv_usec) /1000;
   double exec_time = (convert2.tv_sec - convert1.tv_sec) * 1000 + (double)(convert2.tv_usec - convert1.tv_usec) /1000;
   double convert_time2 = (end.tv_sec - convert2.tv_sec) * 1000 + (double)(end.tv_usec - convert2.tv_usec) /1000;
-  fprintf(stderr,"	forward MKLDNN convert_time1 = %.2f ms, exec_time = %.2f, convert_time2=%.2f\nms",convert_time1,exec_time,convert_time2);
+  fprintf(stderr,"	forward MKLDNN convert_time1 = %.2f ms, exec_time = %.2f, convert_time2=%.2f ms\n",convert_time1,exec_time,convert_time2);
 #endif
 
 #if MKL_TIME
