@@ -61,7 +61,7 @@ function Concat:updateOutput(input)
 end
 
 function Concat:updateGradInput(input, gradOutput)
-
+   self.gradInput = self.gradInput:mkl()
    self.gradInput:resizeAs(input)
    local gradOutputBuffer = {}
    for i,module in ipairs(self.modules) do
@@ -88,7 +88,6 @@ function Concat:updateGradInput(input, gradOutput)
       if currentGradInput then -- if the module does not produce a gradInput (for example first layer), then ignore it and move on.
          if i==1 then
             self.gradInput:copy(currentGradInput)
-            self.gradInput:cdata().mkldnnLayout = currentGradInput:cdata().mkldnnLayout
          else
             self.gradInput:add(currentGradInput)
          end
@@ -98,32 +97,16 @@ function Concat:updateGradInput(input, gradOutput)
 end
 
 function Concat:accGradParameters(input, gradOutput, scale)
-
-   local iterStartTime
-   local iterBackward
-   local backwardTime = 0
-
    scale = scale or 1
    local offset = 1
    for i,module in ipairs(self.modules) do
-
-      if self.timerEnable then
-        iterStartTime = sys.clock()
-      end
       local currentOutput = module.output
       local gradOutputPart = gradOutput:narrow(self.dimension, offset, currentOutput:size(self.dimension))
-      if self.timerEnable then
-            iterBackward = sys.clock() - iterStartTime
-            backwardTime = backwardTime+ iterBackward
-      end
       self:rethrowErrors(module, i, 'accGradParameters',
           input,
           gradOutputPart,
           scale)
       offset = offset + currentOutput:size(self.dimension)
-   end
-   if self.timerEnable then
-        self.timeBackward2 =  backwardTime
    end
 end
 
