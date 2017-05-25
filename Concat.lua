@@ -65,7 +65,7 @@ function Concat:updateGradInput(input, gradOutput)
    self.gradInput:resizeAs(input)
    local gradOutputBuffer = {}
    for i,module in ipairs(self.modules) do
-      local gradOutputPart = torch.MKLFloatTensor()
+      local gradOutputPart = torch.FloatTensor():mkl()
       gradOutputPart:resizeAs(module.output)
       gradOutputBuffer[i] = gradOutputPart
       wrapper(getType(gradOutputPart),
@@ -75,8 +75,10 @@ function Concat:updateGradInput(input, gradOutput)
               i)
    end
    wrapper(getType(gradOutput),
-          'Concat_updateOutput',
+          'Concat_backward_split',
+          self.gradOutputArray:cdata(),
           gradOutput:cdata(),
+          tonumber(#self.modules),
           self.dnnPrimitives:cdata(),
           self.mkldnnInitOk
           )
@@ -101,7 +103,9 @@ function Concat:accGradParameters(input, gradOutput, scale)
    local offset = 1
    for i,module in ipairs(self.modules) do
       local currentOutput = module.output
-      local gradOutputPart = gradOutput:narrow(self.dimension, offset, currentOutput:size(self.dimension))
+      local gradOutputPart = torch.FloatTensor():mkl()
+      gradOutputPart:resizeAs(module.output)
+      --local gradOutputPart = gradOutput:narrow(self.dimension, offset, currentOutput:size(self.dimension))
       self:rethrowErrors(module, i, 'accGradParameters',
           input,
           gradOutputPart,
