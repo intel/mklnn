@@ -238,10 +238,7 @@ void MKLNN_(BatchNormalization_backward)(
     BatchNormScaleshift_res[dnnResourceDiffSrc] = TH_MKL_(data)(gradInput);
     BatchNormScaleshift_res[dnnResourceWorkspace] = buffer_forward_workspace;
     BatchNormScaleshift_res[dnnResourceScaleShift] = buffer_forward_scaleshift;
-    fprintf(stderr, "bn_bwd_scaleshift exec start \n");
-    fprintf(stderr, "BatchNormalization_MKLDNN_backward filter, input=0x%x,gradOutput=0x%x,gradInput=0x%x,workspace=0x%x,scaleshift=0x%x \n", THTensor_(data)(input),THTensor_(data)(gradOutput),THTensor_(data)(gradInput),buffer_forward_workspace,buffer_forward_scaleshift);
     CHECK_ERR( dnnExecute_F32(bn_bwd_scaleshift, (void*)BatchNormScaleshift_res), err );
-    fprintf(stderr, "bn_bwd_scaleshift exec done \n");
     int i = 0;
     for(; i < inC; i++) {
       THTensor_(set1d)(gradWeight, i, buffer_forward_scaleshift[i]);
@@ -283,7 +280,7 @@ void MKLNN_(BatchNormalization_backward)(
       fprintf(stderr, "	BN backward output conversion... \n");
 #endif
       BatchNorm_res[dnnResourceDiffDst] = buffer_backward_output;
-      CHECK_ERR( dnnConversionExecute_F32(cv_backward_output, THTensor_(data)(gradOutput), BatchNorm_res[dnnResourceDiffDst]), err );
+      CHECK_ERR( dnnConversionExecute_F32(cv_backward_output, TH_MKL_(data)(gradOutput), BatchNorm_res[dnnResourceDiffDst]), err );
     }
     gettimeofday(&mid,NULL);
 

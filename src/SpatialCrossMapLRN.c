@@ -210,7 +210,7 @@ void MKLNN_(CrossChannelLRN_backward)(
     fprintf(stderr, "	LRN backward output conversion... \n");
 #endif
     LRN_res[dnnResourceDiffDst] = buffer_backward_output;
-    CHECK_ERR( dnnConversionExecute_F32(cv_backward_output, THTensor_(data)(gradOutput), LRN_res[dnnResourceDiffDst]), err );
+    CHECK_ERR( dnnConversionExecute_F32(cv_backward_output, TH_MKL_(data)(gradOutput), LRN_res[dnnResourceDiffDst]), err );
   }
 
   CHECK_ERR( dnnExecute_F32(bn_backward, (void*)LRN_res), err );

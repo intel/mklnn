@@ -276,7 +276,7 @@ void MKLNN_(SpatialMaxPooling_updateOutput)(
   }
 
   /* get contiguous input */
-  input = THTensor_(newContiguous)(input);
+  //input = THTensor_(newContiguous)(input);
   TH_MKL_(resize4d)(output, nbatch, nslices, oheight, owidth);
   input_data = TH_MKL_(data)(input);
   output_data = TH_MKL_(data)(output);
@@ -401,17 +401,7 @@ void MKLNN_(SpatialMaxPooling_updateGradInput)(
   //change
   /* backprop */
   if (input->tensor->nDimension == 3) {
-    MKLNN_(SpatialMaxPooling_updateGradInput_frame)(
-      gradInput_data,
-      gradOutput_data,
-      indices_data,
-      nslices,
-      iwidth,
-      iheight,
-      owidth,
-      oheight,
-      dW,
-      dH);
+    printf("Unsupported: SpatialMaxPooling_updateGradInput input dimension is 3\n");
   }
   else {
     /**************************************MKLDNN interface*****************************************/
