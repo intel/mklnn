@@ -17,10 +17,9 @@ Conversion between `nn` and `mklnn` is available through `mklnn.convert` functio
 
 ```lua
 require 'mklnn'  -- will automatically require mkltorch
-```lua
 
 The following OP are supported in this package:
-```lua
+
 -- All inputs have to be 3D or 4D(batch-mode)
 mklnn.SpatialConvolution(nInputPlane, nOutputPlane, kW, kH, [dW = 1], [dH = 1], [padW = 0], [padH = 0], [groups = 1])
 mklnn.SpatialMaxPooling(kW, kH, dW, dH, padW, padH)
@@ -36,7 +35,7 @@ mklnn.I2U()  -- convert the internel layout to user layout
 
 -- Op in plan, and this list will increase
 mklnn.FullConvlolution
-```lua
+```
 
 #### Conversion between mklnn and nn
 
@@ -51,7 +50,7 @@ net:add(nn.SpatialConvolution(3,96,11,11,4,4))
 net:add(nn.ReLU())
 mklnn.convert(net, 'mkl')
 print(net)
-```lua
+```
 will result in:
 ```lua
 nn.Sequential {
@@ -60,6 +59,6 @@ nn.Sequential {
   (2): mklnn.SpatialConvolution(3 -> 96, 11x11, 4,4)
   (3): mklnn.ReLU
 }
-```lua
+```
 
 Get another demo from this [link](https://github.com/xhzhao/convnet-benchmarks/tree/mklnn) to perform an Convnet benchmark test.
