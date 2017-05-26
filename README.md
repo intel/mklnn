@@ -13,6 +13,20 @@ Conversion between `nn` and `mklnn` is available through `mklnn.convert` functio
 * Install mkltorch (luarocks install mkltorch)
 * Install mklnn (luarocks install mklnn)
 
+#### Performance
+
+Convnet Benchmark performance from this [link](https://github.com/xhzhao/convnet-benchmarks/tree/mklnn) 
+* distro: The Out-Of-Box Torch is installed from [distro](https://github.com/torch/distro) with openblas
+* distro+mklnn: mklml version
+* distro+cudnn: cudnn version
+
+|  Inference      |    distro     |   distro+mklnn  | distro+cudnn |
+|:-------------:|:-----------------:|:---------------:|:---------------:|
+| alexnet      |:-----------------:|:---------------:|:---------------:|
+| overfeat     |:-----------------:|:---------------:|:---------------:|
+| vgg_a        |:-----------------:|:---------------:|:---------------:|
+| googlenet    |:-----------------:|:---------------:|:---------------:|
+
 #### Modules
 
 ```lua
@@ -27,14 +41,14 @@ mklnn.SpatialAveragePooling(kW, kH, dW, dH, padW, padH)
 mklnn.SpatialBatchNormalization(nFeature, eps, momentum, affine)
 mklnn.SpatialCrossMapLRN(size, alpha, beta, k)
 mklnn.Concat(dimension)
-mklnn.ReLU(inplace[=false])
+mklnn.ReLU([inplace=false])
 
 -- Two layout conversion op
 mklnn.U2I()  -- convert the user layout(default NCHW) to internal layout(required by MKLDNN library)
 mklnn.I2U()  -- convert the internel layout to user layout
 
 -- Op in plan, and this list will increase
-mklnn.FullConvlolution
+mklnn.SpatialFullConvolution()
 ```
 
 #### Conversion between mklnn and nn
