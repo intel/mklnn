@@ -8,20 +8,13 @@ function SpatialMaxPooling:__init(kW, kH, dW, dH, padW, padH)
 
    dW = dW or kW
    dH = dH or kH
-   
    self.kW = kW
    self.kH = kH
    self.dW = dW
    self.dH = dH
-
    self.padW = padW or 0
    self.padH = padH or 0
-
-
    self.ceil_mode = false
-   self.indices = torch.Tensor()
-
-
 end
 
 function SpatialMaxPooling:ceil()
@@ -44,10 +37,8 @@ function SpatialMaxPooling:updateOutput(input)
    self.dnnPrimitives = self.dnnPrimitives or torch.LongTensor(16)
 
    self.output = self.output:mkl() --add
-   self.indices = self.indices:mkl() --add
    self.gradInput = self.gradInput:mkl()
 
-   --self.indices = self.indices or input.new()
    -- backward compatibility
    self.ceil_mode = self.ceil_mode or false
    self.padW = self.padW or 0
@@ -57,7 +48,6 @@ function SpatialMaxPooling:updateOutput(input)
     wrapper(getType(input),'SpatialMaxPooling_updateOutput',
        input:cdata(),
        self.output:cdata(),
-       self.indices:cdata(),
        self.kW, self.kH,
        self.dW, self.dH,
        self.padW, self.padH,
@@ -73,7 +63,6 @@ function SpatialMaxPooling:updateGradInput(input, gradOutput)
       input:cdata(),
       gradOutput:cdata(),
       self.gradInput:cdata(),
-      self.indices:cdata(),
       self.kW, self.kH,
       self.dW, self.dH,
       self.padW, self.padH,
@@ -99,8 +88,5 @@ function SpatialMaxPooling:__tostring__()
 end
 
 function SpatialMaxPooling:clearState()
-   if self.indices then
-      self.indices:set()
-   end
-   --return parent.clearState(self)
+   return parent.clearState(self)
 end

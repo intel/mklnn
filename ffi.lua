@@ -3,14 +3,11 @@ local ffi = require 'ffi'
 
 local cdefs = [[
 
-
 void MKLNN_RealSpatialConvolution_forward(
   THMKLRealTensor *input,
   THMKLRealTensor *output,
   THRealTensor *weight,
   THRealTensor *bias,
-  THRealTensor *finput,
-  THRealTensor *fgradInput,
   THLongTensor *primitives,
   int initOk,
   int kW,
@@ -21,15 +18,12 @@ void MKLNN_RealSpatialConvolution_forward(
   int padH,
   int group);
 
-
 void MKLNN_RealSpatialConvolution_bwdData(
   THMKLRealTensor *input,
   THMKLRealTensor *gradOutput,
   THMKLRealTensor *gradInput,
   THRealTensor *weight,
   THRealTensor *bias,
-  THRealTensor *finput,
-  THRealTensor *fgradInput,
   THLongTensor *primitives,
   int initOk,
   int kW,
@@ -45,8 +39,6 @@ void MKLNN_RealSpatialConvolution_bwdFilter(
   THMKLRealTensor *gradOutput,
   THRealTensor *gradWeight,
   THRealTensor *gradBias,
-  THRealTensor *finput,
-  THRealTensor *fgradInput,
   THLongTensor *primitives,
   int initOk,
   int kW,
@@ -76,42 +68,9 @@ void MKLNN_RealThreshold_updateOutput(
   THLongTensor *primitives,
   int initOk);
 
-static void MKLNN_RealSpatialMaxPooling_init_forward(
-  THLongTensor *primitives,
-  int N,
-  int inC,
-  int inH,
-  int inW,
-  int kH,
-  int kW,
-  int dH,
-  int dW,
-  int padH,
-  int padW,
-  int outC,
-  int outH,
-  int outW);
-
-static void MKLNN_RealSpatialMaxPooling_init_backward(
-  THLongTensor *primitives,
-  int N,
-  int inC,
-  int inH,
-  int inW,
-  int kH,
-  int kW,
-  int dH,
-  int dW,
-  int padH,
-  int padW,
-  int outC,
-  int outH,
-  int outW);
-
 void MKLNN_RealSpatialMaxPooling_updateOutput(
   THMKLRealTensor *input,
   THMKLRealTensor *output,
-  THMKLRealTensor *indices,
   int kW,
   int kH,
   int dW,
@@ -126,7 +85,6 @@ void MKLNN_RealSpatialMaxPooling_updateGradInput(
   THMKLRealTensor *input,
   THMKLRealTensor *gradOutput,
   THMKLRealTensor *gradInput,
-  THMKLRealTensor *indices,
   int kW,
   int kH,
   int dW,
@@ -137,21 +95,34 @@ void MKLNN_RealSpatialMaxPooling_updateGradInput(
   THLongTensor *primitives,
   int initOk);
 
-static void MKLNN_RealBatchNormalization_init_forward(
-  THLongTensor *primitives,
-  int N,
-  int inC,
-  int inH,
-  int inW,
-  double eps);
+void MKLNN_RealSpatialAveragePooling_updateOutput(
+          THMKLRealTensor *input,
+          THMKLRealTensor *output,
+          int kW,
+          int kH,
+          int dW,
+          int dH,
+          int padW,
+          int padH,
+          bool ceil_mode,
+          bool count_include_pad,
+          THLongTensor *primitives,
+          int initOk);
 
-static void MKLNN_RealBatchNormalization_init_backward(
-  THLongTensor *primitives,
-  int N,
-  int outC,
-  int outH,
-  int outW,
-  double eps);
+void MKLNN_RealSpatialAveragePooling_updateGradInput(
+          THMKLRealTensor *input,
+          THMKLRealTensor *gradOutput,
+          THMKLRealTensor *gradInput,
+          int kW,
+          int kH,
+          int dW,
+          int dH,
+          int padW,
+          int padH,
+          bool ceil_mode,
+          bool count_include_pad,
+          THLongTensor *primitives,
+          int initOk);
 
 void MKLNN_RealBatchNormalization_updateOutput(
    THMKLRealTensor *input, 
@@ -180,28 +151,6 @@ void MKLNN_RealBatchNormalization_backward(
   double eps,
   THLongTensor *primitives,
   int initOk);
-
-static void MKLNN_RealCrossChannelLRN_init_forward(
-  THLongTensor *primitives,
-  int N,
-  int inC,
-  int inH,
-  int inW,
-  int size, 
-  float alpha, 
-  float beta, 
-  float k);
-
-static void MKLNN_RealCrossChannelLRN_init_backward(
-  THLongTensor *primitives,
-  int N,
-  int outC,
-  int outH,
-  int outW,
-  int size, 
-  float alpha, 
-  float beta, 
-  float k);
 
 void MKLNN_RealCrossChannelLRN_updateOutput(
   THMKLRealTensor *input, 
@@ -242,36 +191,7 @@ void MKLNN_RealConcat_backward_split(
           int  moduleNum,
           THLongTensor *primitives,
           int initOk);
-
-void MKLNN_RealSpatialAveragePooling_updateOutput(
-          THMKLRealTensor *input,
-          THMKLRealTensor *output,
-          int kW,
-          int kH,
-          int dW,
-          int dH,
-          int padW,
-          int padH,
-          bool ceil_mode,
-          bool count_include_pad,
-          THLongTensor *primitives,
-          int initOk);
-void MKLNN_RealSpatialAveragePooling_updateGradInput(
-          THMKLRealTensor *input,
-          THMKLRealTensor *gradOutput,
-          THMKLRealTensor *gradInput,
-          int kW,
-          int kH,
-          int dW,
-          int dH,
-          int padW,
-          int padH,
-          bool ceil_mode,
-          bool count_include_pad,
-          THLongTensor *primitives,
-          int initOk);
 ]]
-
 
 local Real2real = {
    Float='float',

@@ -219,7 +219,6 @@ void MKLNN_(SpatialMaxPooling_updateOutput)(
   //THNNState *state,
   THMKLTensor *input,
   THMKLTensor *output,
-  THMKLTensor *indices,
   int kW,
   int kH,
   int dW,
@@ -240,7 +239,6 @@ void MKLNN_(SpatialMaxPooling_updateOutput)(
   long owidth;
   real *input_data;
   real *output_data;
-  real *indices_data;
   //change
   //printf("input->tensor->nDimension = %d ........\n",input->tensor->nDimension);
   THArgCheck(input->tensor->nDimension == 3 || input->tensor->nDimension == 4, 2, "3D or 4D (batch mode) tensor expected");
@@ -352,7 +350,6 @@ void MKLNN_(SpatialMaxPooling_updateGradInput)(
   THMKLTensor *input,
   THMKLTensor *gradOutput,
   THMKLTensor *gradInput,
-  THMKLTensor *indices,
   int kW,
   int kH,
   int dW,
@@ -373,7 +370,6 @@ void MKLNN_(SpatialMaxPooling_updateGradInput)(
   int owidth;
   real *gradInput_data;
   real *gradOutput_data;
-  real *indices_data;
 
   /* get contiguous gradOutput */
   gradOutput->tensor = THTensor_(newContiguous)(gradOutput->tensor);
@@ -397,7 +393,6 @@ void MKLNN_(SpatialMaxPooling_updateGradInput)(
   /* get raw pointers */
   gradInput_data = TH_MKL_(data)(gradInput);
   gradOutput_data = TH_MKL_(data)(gradOutput);
-  indices_data = TH_MKL_(data)(indices);
   //change
   /* backprop */
   if (input->tensor->nDimension == 3) {

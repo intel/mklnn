@@ -77,8 +77,6 @@ function SpatialConvolution:updateOutput(input)
    self.output = self.output:mkl()
    self.gradInput = self.gradInput:mkl()
 
-   self.finput = torch.FloatTensor()
-   self.fgradInput = torch.FloatTensor()
    if self.padding then
       self.padW = self.padding
       self.padH = self.padding
@@ -90,8 +88,6 @@ function SpatialConvolution:updateOutput(input)
       self.output:cdata(),
       self.weight:cdata(),
       self.bias:cdata(),
-      self.finput:cdata(),
-      self.fgradInput:cdata(),
       self.dnnPrimitives:cdata(),self.mkldnnInitOk,
       self.kW, self.kH,
       self.dW, self.dH,
@@ -109,8 +105,6 @@ function SpatialConvolution:updateGradInput(input, gradOutput)
          self.gradInput:cdata(),
          self.weight:cdata(),
          self.bias:cdata(),
-         self.finput:cdata(),
-         self.fgradInput:cdata(),
          self.dnnPrimitives:cdata(),self.mkldnnInitOk,
          self.kW, self.kH,
          self.dW, self.dH,
@@ -128,8 +122,6 @@ function SpatialConvolution:accGradParameters(input, gradOutput, scale)
       gradOutput:cdata(),
       self.gradWeight:cdata(),
       self.gradBias:cdata(),
-      self.finput:cdata(),
-      self.fgradInput:cdata(),
       self.dnnPrimitives:cdata(),self.mkldnnInitOk,
       self.kW, self.kH,
       self.dW, self.dH,
@@ -139,8 +131,6 @@ function SpatialConvolution:accGradParameters(input, gradOutput, scale)
 end
 
 function SpatialConvolution:type(type,tensorCache)
-   self.finput = self.finput and torch.Tensor()
-   self.fgradInput = self.fgradInput and torch.Tensor()
    return parent.type(self,type,tensorCache)
 end
 
@@ -157,6 +147,6 @@ function SpatialConvolution:__tostring__()
 end
 
 function SpatialConvolution:clearState()
-   nn.utils.clear(self, 'finput', 'fgradInput', '_input', '_gradOutput')
+   nn.utils.clear(self, '_input', '_gradOutput')
    return parent.clearState(self)
 end
