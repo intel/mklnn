@@ -62,16 +62,17 @@ require 'mklnn'
 net = nn.Sequential()
 net:add(nn.SpatialConvolution(3,96,11,11,4,4))
 net:add(nn.ReLU())
-mklnn.convert(net, 'mkl')
-print(net)
+mklnet = mklnn.convert(net, 'mkl')
+print(mklnet)
 ```
 will result in:
 ```lua
 nn.Sequential {
-  [input -> (1) -> (2) -> (3) -> output]
+  [input -> (1) -> (2) -> (3) -> (4) -> output]
   (1): mklnn.U2I
   (2): mklnn.SpatialConvolution(3 -> 96, 11x11, 4,4)
   (3): mklnn.ReLU
+  (4): mklnn.I2U
 }
 ```
 

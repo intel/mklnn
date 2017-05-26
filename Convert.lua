@@ -49,6 +49,10 @@ local convert = function(src_model, th2mkl)
     return nil
   end
   model_flag, model = convertAdvancedModel(src_model, cvtOp, false)    -- false: regular true: mklnn
+  if model_flag then
+    local convert_layer = mklnn.I2U()
+    model:add(convert_layer)
+  end
   return model
 end
 
