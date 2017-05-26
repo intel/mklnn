@@ -1,12 +1,12 @@
-mklnn
+**mklnn**
 ===========
 
 Torch-7 FFI binding and C warpper for Intel MKLDNN library, and MKLDNN library is designed by Intel to accelerate Deep Neural Network(DNN) computation on CPU, in particular Intel® Xeon processors (HSW, BDW, Xeon Phi), which is competitive to cuDNN library.
 
-Modules are API compatible their [`nn`](https://github.com/torch/nn) equivalents. Fully unit-tested against `nn` implementations.
+Modules are API compatible with their [`nn`](https://github.com/torch/nn) equivalents. Fully unit-tested against `nn` implementations.
 Conversion between `nn` and `mklnn` is available through `mklnn.convert` function.
 
-##### Dependency and installation
+#### Dependency and installation
 
 * Install torch with this [instructions](http://torch.ch/docs/getting-started.html)
 * MKLML library auto-download and setting(see this [link](https://github.com/xhzhao/EnvCheck))
