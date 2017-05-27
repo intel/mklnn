@@ -12,6 +12,8 @@ mklOP2thOP['mklnn.ReLU']                  = nn.ReLU
 mklOP2thOP['nn.ReLU']                     = nn.ReLU
 mklOP2thOP['mklnn.Concat']                = nn.Concat
 mklOP2thOP['nn.Concat']                   = nn.Concat
+mklOP2thOP['mklnn.Dropout']               = nn.Dropout
+mklOP2thOP['nn.Dropout']                  = nn.Dropout
 
 
 local thOP2mklOP = {}
@@ -27,6 +29,8 @@ thOP2mklOP['nn.ReLU']                     = mklnn.ReLU
 thOP2mklOP['mklnn.ReLU']                  = mklnn.ReLU
 thOP2mklOP['nn.Concat']                   = mklnn.Concat
 thOP2mklOP['mklnn.Concat']                = mklnn.Concat
+thOP2mklOP['mklnn.Dropout']               = mklnn.Dropout
+thOP2mklOP['nn.Dropout']                  = mklnn.Dropout
 
 --[[
 NOTE:
@@ -150,6 +154,16 @@ function convertAdvancedModel(src_module, cvtOP, prevOPFlag)
           prevOPFlag = true
         end
           dst_module:add(dst_layer)        
+       
+      elseif(string.find(layer_type, 'Dropout')) then
+        --print('Dropout')
+        local ip = src_layer.inplace
+        local p = src_layer.p 
+        local train = src_layer.train
+        local stochastic_inference = src_layer.stochasticInference
+        local v1 = not src_layer.v2
+        local dst_layer = cvtOP[layer_type](p, v1, ip, stochastic_inference)
+        dst_module:add(dst_layer)        
        
       elseif(string.find(layer_type, 'Concat') or string.find(layer_type, 'Sequential')) then 
         local model_flag, sub_module = convertAdvancedModel(src_layer, cvtOP, prevOPFlag)
