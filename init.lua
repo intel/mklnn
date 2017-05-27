@@ -43,6 +43,7 @@ require('mklnn.I2U')
 require('mklnn.U2I')
 require('mklnn.Concat')
 require('mklnn.Concat2')
+require('mklnn.Dropout')
 
 mklnn.convert = require('mklnn.Convert')
 return mklnn
