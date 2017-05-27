@@ -2,8 +2,6 @@
 #define TH_GENERIC_FILE "src/SpatialMaxPooling.c"
 #else
 
-#include "MKLDNN.h"
-
 static void MKLNN_(SpatialMaxPooling_init_forward)(
   THLongTensor *primitives,
   int N,

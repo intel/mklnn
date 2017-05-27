@@ -2,10 +2,6 @@
 #define TH_GENERIC_FILE "src/SpatialCrossMapLRN.c"
 #else
 
-
-#include "MKLDNN.h"
-
-
 static void MKLNN_(CrossChannelLRN_init_forward)(
   THLongTensor *primitives,
   int N,

@@ -1,7 +1,3 @@
-#include <mkl_vsl.h>
-#include <sys/time.h>
-#include "Random.h"
-
 #ifndef TH_GENERIC_FILE
 #define TH_GENERIC_FILE "src/Random.c"
 #else
