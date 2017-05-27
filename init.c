@@ -3,6 +3,7 @@
 #include <stdbool.h>
 #include <stdarg.h>
 #include <stddef.h>
+#include <omp.h>
 #include <sys/time.h>
 
 #include "luaT.h"

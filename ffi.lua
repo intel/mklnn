@@ -191,6 +191,11 @@ void MKLNN_RealConcat_backward_split(
           int  moduleNum,
           THLongTensor *primitives,
           int initOk);
+
+void MKLNN_RealDropout_updateOutput(
+  THRealTensor *input,
+  THRealTensor *output,
+  double p);
 ]]
 
 local Real2real = {

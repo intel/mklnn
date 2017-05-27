@@ -362,6 +362,29 @@ function mklnntest.Concat()
    mytester:assertTensorEq(oriGradInput, dnnGradInput:th(), 0.00001, 'mklnn.Concat backward err (gradInput)')
 end
 
+function mklnntest.Dropout()
+   local p = 0.2 --prob of droping out a neuron
+   local input = torch.Tensor(1000):fill((1-p))
+   local module = mklnn.Dropout(p)
+   -- version 2
+   local output = module:forward(input)
+   mytester:assert(math.abs(output:mean() - (1-p)) < 0.05, 'dropout output')
+
+   -- test inplace version
+   local module = mklnn.Dropout(p,nil,true)
+   local output = module:forward(input:clone())
+   mytester:assert(math.abs(output:mean() - (1-p)) < 0.05, 'dropout output')
+
+   -- version 1 (old nnx version)
+   local input = input:fill(1)
+   local module = nn.Dropout(p,true)
+   local output = module:forward(input)
+   mytester:assert(math.abs(output:mean() - (1-p)) < 0.05, 'dropout output')
+   
+end
+
+
+
 mytester:add(mklnntest)
 jac = nn.Jacobian
 sjac = nn.SparseJacobian

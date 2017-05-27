@@ -26,10 +26,9 @@ function Dropout:updateOutput(input)
    if self.p > 0 then
       if self.train or self.stochastic_inference then
          self.noise:resizeAs(input)
-         --self.noise:bernoulli(1-self.p)
          wrapper(getType(input),'Dropout_updateOutput',
                input:cdata(),
-               self.noise,
+               self.noise:cdata(),
                1-self.p)
          if self.v2 then
             self.noise:div(1-self.p)

@@ -2,9 +2,9 @@
 #define TH_GENERIC_FILE "src/Random.c"
 #else
 
-
+#define min(x,y) (x<y?x:y)
 void MKLNN_(Dropout_updateOutput)(
-  THDoubleTensor *input,
+  THTensor *input,
   THTensor *output,
   double p)
 {
@@ -13,27 +13,13 @@ void MKLNN_(Dropout_updateOutput)(
     struct timeval start;
     gettimeofday(&start,NULL);
     long seed = start.tv_sec * 1000 + (double)start.tv_usec/1000;
-    //generate mt19937 random number
-    //VSLStreamStatePtr stream_mt19937;
-    //vslNewStream( &stream_mt19937, VSL_BRNG_MT19937, seed);
-    //int *seed_mt19937 = (int*)malloc(1*sizeof(int));
-    //vsRngUniform( VSL_RNG_METHOD_UNIFORM_STD, stream_mt19937, 1, seed_mt19937, 1, 4294967295);
-    //vslDeleteStream(&stream_mt19937);
-           
-    //mt19937 as seed to generate bernoulli  
-    
 
     RNG  rng = RNGInit(seed);
     unsigned long seedNew = RandInt(&rng);
     int n = THTensor_(nElement)(input);
-    int *r = THTensor_(data)(output);
-    printf("----------------run here!\n");
-
+    real *r = THTensor_(data)(output);
     int nthr = omp_get_max_threads();
-    printf("----------------run here!\n");
- 
     int *tmp = (int*)malloc(n*sizeof(int));
-    
     # pragma omp parallel num_threads(nthr)
     {
     const int ithr = omp_get_thread_num();
@@ -57,8 +43,6 @@ void MKLNN_(Dropout_updateOutput)(
     r[k]=tmp[k];
   }
   free(tmp);
-  //free(seed_mt19937);
-
 }
 
 #endif
