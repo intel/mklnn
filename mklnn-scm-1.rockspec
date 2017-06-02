@@ -2,14 +2,14 @@ package = "mklnn"
 version = "scm-1"
 
 source = {
-   url = "git://github.com/xhzhao/mklnn.git",
+   url = "git://github.com/intel/mklnn.git",
 }
 
 description = {
    summary = "Neural Network package for Torch",
    detailed = [[
    ]],
-   homepage = "https://github.com/xhzhao/mklnn",
+   homepage = "https://github.com/intel/mklnn",
    license = "BSD"
 }
 
