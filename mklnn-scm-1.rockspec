@@ -38,7 +38,7 @@ build = {
 },
 
    build_command = [[
-   cmake -E make_directory build && cd build && cmake .. -DCMAKE_BUILD_TYPE=Release -DWITH_IOMP=ON  -DCMAKE_PREFIX_PATH="$(LUA_BINDIR)/.." -DCMAKE_INSTALL_PREFIX="$(PREFIX)" && $(MAKE)
+cmake -E make_directory build && cd build && cmake .. -DLUALIB=$(LUALIB) -DFORCE_AVX512=$(FORCE_AVX512) -DCMAKE_C_COMPILER=$(CC) -DCMAKE_BUILD_TYPE=Release -DCMAKE_PREFIX_PATH="$(LUA_BINDIR)/.." -DCMAKE_INSTALL_PREFIX="$(PREFIX)" && $(MAKE) -j$jopts install
 ]],
-   install_command = "cd build && $(MAKE) install"
+
 }
